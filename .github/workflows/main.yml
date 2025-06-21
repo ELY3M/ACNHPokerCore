@@ -58,6 +58,20 @@ jobs:
     - name: list all dirs 
       run: ls -R 
 
+    - name: Get .NET Version  
+    - uses: kzrnm/get-net-sdk-project-versions-action@v2
+      id: get-version
+      with:
+        proj-path: ${{ github.workspace }}\ACNHPokerCore\ACNHPokerCore.csproj
+    - run: echo "${{steps.get-version.outputs.version}}"
+    - run: echo "${{steps.get-version.outputs.version-prefix}}" 
+    - run: echo "${{steps.get-version.outputs.version-suffix}}" 
+    - run: echo "${{steps.get-version.outputs.package-version}}" 
+    - run: echo "${{steps.get-version.outputs.assembly-version}}" 
+    - run: echo "${{steps.get-version.outputs.file-version}}" 
+    - run: echo "${{steps.get-version.outputs.informational-version}}" 
+    
+      
     - name: Create Release
       uses: actions/create-release@latest
       env:
