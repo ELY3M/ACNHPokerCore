@@ -63,13 +63,16 @@ jobs:
       id: get-version
       with:
         proj-path: ${{ github.workspace }}\ACNHPokerCore\ACNHPokerCore.csproj
-    - run: echo "${{steps.get-version.outputs.version}}"
-    - run: echo "${{steps.get-version.outputs.version-prefix}}" 
-    - run: echo "${{steps.get-version.outputs.version-suffix}}" 
-    - run: echo "${{steps.get-version.outputs.package-version}}" 
-    - run: echo "${{steps.get-version.outputs.assembly-version}}" 
-    - run: echo "${{steps.get-version.outputs.file-version}}" 
-    - run: echo "${{steps.get-version.outputs.informational-version}}" 
+        
+    - name: Get .NET Version test    
+    - run: | 
+        echo "${{steps.get-version.outputs.version}}"
+        echo "${{steps.get-version.outputs.version-prefix}}" 
+        echo "${{steps.get-version.outputs.version-suffix}}" 
+        echo "${{steps.get-version.outputs.package-version}}" 
+        echo "${{steps.get-version.outputs.assembly-version}}" 
+        echo "${{steps.get-version.outputs.file-version}}" 
+        echo "${{steps.get-version.outputs.informational-version}}" 
     
       
     - name: Create Release
