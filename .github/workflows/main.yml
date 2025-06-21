@@ -61,7 +61,7 @@ jobs:
     - name: Get .NET Version 
       id: netversion    
       run: | 
-        dotnet msbuild ${{ github.workspace }}\ACNHPokerCoreACNHPokerCore.csproj --getProperty:TargetFramework
+        dotnet msbuild ${{ github.workspace }}\ACNHPokerCore\ACNHPokerCore.csproj --getProperty:TargetFramework
     
     - name: .NET Version test  
       run: | 
