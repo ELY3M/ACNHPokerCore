@@ -61,14 +61,12 @@ jobs:
     - name: Get .NET Version 
       id: netversion    
       run: | 
-        echo ("NETVERSION=" + 'dotnet msbuild ACNHPokerCore/ACNHPokerCore.csproj --getProperty:TargetFramework') >> $env:GITHUB_ENV
+        for /f "delims=" %i in ('dotnet msbuild ACNHPokerCore/ACNHPokerCore.csproj --getProperty:TargetFramework') do (echo NETVERSION=%i >> %GITHUB_ENV%)
         
     - name: .NET Version test  
       run: | 
         echo $env:NETVERSION
-        echo "${{steps.netversion}}"
-        echo "${{steps.netversion.outputs}}"    
-      
+        
     - name: Create Release
       uses: actions/create-release@latest
       env:
