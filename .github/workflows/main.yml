@@ -58,7 +58,6 @@ jobs:
     - name: list all dirs 
       run: ls -R 
 
-    - name: Get .NET Version  
     - uses: kzrnm/get-net-sdk-project-versions-action@v2
       id: get-version
       with:
