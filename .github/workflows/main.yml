@@ -61,15 +61,12 @@ jobs:
     - name: Get .NET Version 
       id: netversion    
       run: | 
-        @SET NETVERSION=
-        FOR /F %%I IN ('dotnet msbuild ACNHPokerCore/ACNHPokerCore.csproj --getProperty:TargetFramework') DO @SET "NETVERSION=%%I"
-        echo %netversion% >> $env:GITHUB_ENV
+        echo "NETVERSION='dotnet msbuild ACNHPokerCore/ACNHPokerCore.csproj --getProperty:TargetFramework' >> $env:GITHUB_ENV
+        echo ("NETVERSION=" + 'dotnet msbuild ACNHPokerCore/ACNHPokerCore.csproj --getProperty:TargetFramework') >> $env:GITHUB_ENV
         
     - name: .NET Version test  
       run: | 
         echo $env:NETVERSION
-        echo NETVERSION
-        echo %netversion%
         echo "${{steps.netversion}}"
         echo "${{steps.netversion.outputs}}"    
       
