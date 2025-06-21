@@ -31,7 +31,7 @@ namespace ACNHPokerCore
         private int colNum;
         private byte[][] SpawnArea;
         private bool spawnlock;
-        private bool debugging;
+        private readonly bool debugging;
         public BulkSpawn(Socket S, USBBot Bot, byte[] layer1, byte[] layer2, byte[] acre, byte[] building, byte[] terrain, byte[] design, int x, int y, bool Ignore, bool Sound, bool Debugging, bool Layer1Selected)
         {
             try
@@ -95,7 +95,7 @@ namespace ACNHPokerCore
             string savepath;
 
             if (config.AppSettings.Settings["LastLoad"].Value.Equals(string.Empty))
-                savepath = Directory.GetCurrentDirectory() + @"\save";
+                savepath = Directory.GetCurrentDirectory() + "\\" + Utilities.saveFolder;
             else
                 savepath = config.AppSettings.Settings["LastLoad"].Value;
 

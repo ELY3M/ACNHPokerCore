@@ -23,7 +23,7 @@ namespace ACNHPokerCore
         private static readonly int turningSize = 4;
         private static readonly int teleportSize = coordinateSize + turningSize;
 
-        private static readonly object lockObject = new();
+        private static readonly Lock lockObject = new();
         private static string anchorPath;
 
         public enum OverworldState
@@ -96,7 +96,7 @@ namespace ACNHPokerCore
             Config.Save(ConfigurationSaveMode.Minimal);
         }
 
-        public static string getAnchorPath()
+        public static string GetAnchorPath()
         {
             return anchorPath;
         }
@@ -320,6 +320,8 @@ namespace ACNHPokerCore
                 return OverworldState.Loading;
             else if ($"{value:X8}".EndsWith("5B08"))
                 return OverworldState.Loading;
+            else if ($"{value:X8}".EndsWith("6174"))
+                return OverworldState.Loading;
             return value switch
             {
                 0x00000000 => OverworldState.Null,
@@ -343,7 +345,7 @@ namespace ACNHPokerCore
             string savepath;
 
             if (config.AppSettings.Settings["LastSave"].Value.Equals(string.Empty))
-                savepath = Directory.GetCurrentDirectory() + @"\save";
+                savepath = Directory.GetCurrentDirectory() + "\\" + Utilities.saveFolder;
             else
                 savepath = config.AppSettings.Settings["LastSave"].Value;
 

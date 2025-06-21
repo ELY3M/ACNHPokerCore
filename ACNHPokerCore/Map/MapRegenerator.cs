@@ -15,12 +15,12 @@ namespace ACNHPokerCore
 {
     public partial class MapRegenerator : Form
     {
-        private Socket s;
+        private readonly Socket s;
         private int counter;
         private bool loop;
         private bool wasLoading = true;
         private Thread RegenThread;
-        private readonly object mapLock = new();
+        private readonly Lock mapLock = new();
         private int delayTime = 50;
         private int pauseTime = 70;
         private readonly bool sound;
@@ -35,7 +35,7 @@ namespace ACNHPokerCore
         private byte[][] villager;
         private bool[] haveVillager;
         private bool FormIsClosing;
-        private bool debugging;
+        private readonly bool debugging;
 
 
         public Dodo dodoSetup;
@@ -45,7 +45,7 @@ namespace ACNHPokerCore
         private CancellationTokenSource cts;
 
         public event CloseHandler CloseForm;
-        public event UpdateTurnipPriceHandler updateTurnipPriceHandler;
+        public event UpdateTurnipPriceHandler UpdateTurnipPriceHandler;
 
         #region Form Load
         public MapRegenerator(Socket S, bool Sound, bool Debugging)
@@ -84,7 +84,7 @@ namespace ACNHPokerCore
                 string savepath;
 
                 if (config.AppSettings.Settings["LastSave"].Value.Equals(string.Empty))
-                    savepath = Directory.GetCurrentDirectory() + @"\save";
+                    savepath = Directory.GetCurrentDirectory() + "\\" + Utilities.saveFolder;
                 else
                     savepath = config.AppSettings.Settings["LastSave"].Value;
 
@@ -159,7 +159,7 @@ namespace ACNHPokerCore
                 string savepath;
 
                 if (config.AppSettings.Settings["LastLoad"].Value.Equals(string.Empty))
-                    savepath = Directory.GetCurrentDirectory() + @"\save";
+                    savepath = Directory.GetCurrentDirectory() + "\\" + Utilities.saveFolder;
                 else
                     savepath = config.AppSettings.Settings["LastLoad"].Value;
 
@@ -252,7 +252,7 @@ namespace ACNHPokerCore
                 string savepath;
 
                 if (config.AppSettings.Settings["LastLoad"].Value.Equals(string.Empty))
-                    savepath = Directory.GetCurrentDirectory() + @"\save";
+                    savepath = Directory.GetCurrentDirectory() + "\\" + Utilities.saveFolder;
                 else
                     savepath = config.AppSettings.Settings["LastLoad"].Value;
 
@@ -349,7 +349,7 @@ namespace ACNHPokerCore
                 string savepath;
 
                 if (config.AppSettings.Settings["LastLoad"].Value.Equals(string.Empty))
-                    savepath = Directory.GetCurrentDirectory() + @"\save";
+                    savepath = Directory.GetCurrentDirectory() + "\\" + Utilities.saveFolder;
                 else
                     savepath = config.AppSettings.Settings["LastLoad"].Value;
 
@@ -1077,7 +1077,7 @@ namespace ACNHPokerCore
         }
 
         #region Form functions/controls
-        private bool SafeEquals(byte[] strA, byte[] strB)
+        private static bool SafeEquals(byte[] strA, byte[] strB)
         {
             int length = strA.Length;
             if (length != strB.Length)
@@ -1187,7 +1187,7 @@ namespace ACNHPokerCore
             Close();
         }
 
-        private void BuildEmptyTable(byte[] org, ref bool[] table)
+        private static void BuildEmptyTable(byte[] org, ref bool[] table)
         {
             byte[] Part1 = new byte[0xC00];
             byte[] Part2 = new byte[0xC00];
@@ -1303,7 +1303,7 @@ namespace ACNHPokerCore
             }
         }
 
-        private bool Difference(byte[] org, ref byte[] upd, bool[] isEmpty, byte[] cur)
+        private static bool Difference(byte[] org, ref byte[] upd, bool[] isEmpty, byte[] cur)
         {
             bool output = true;
             bool output2 = true;
@@ -1453,19 +1453,19 @@ namespace ACNHPokerCore
         #endregion
 
         #region Log
-        private DataTable LoadCSV(string filePath)
+        private static DataTable LoadCSV(string filePath)
         {
             var dt = new DataTable();
 
             File.ReadLines(filePath).Take(1)
-                .SelectMany(x => x.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries))
+                .SelectMany(x => x.Split([","], StringSplitOptions.RemoveEmptyEntries))
                 .ToList()
                 .ForEach(x => dt.Columns.Add(x.Trim()));
 
             dt.Columns["Timestamp"].DataType = typeof(DateTime);
 
             File.ReadLines(filePath).Skip(1)
-                .Select(x => x.Split(new[] { "," }, StringSplitOptions.None))
+                .Select(x => x.Split([","], StringSplitOptions.None))
                 .ToList()
                 .ForEach(line => dt.Rows.Add(line));
 
@@ -1509,7 +1509,7 @@ namespace ACNHPokerCore
             string savepath;
 
             if (config.AppSettings.Settings["LastSave"].Value.Equals(string.Empty))
-                savepath = Directory.GetCurrentDirectory() + @"\save";
+                savepath = Directory.GetCurrentDirectory() + "\\" + Utilities.saveFolder;
             else
                 savepath = config.AppSettings.Settings["LastSave"].Value;
 
@@ -1567,7 +1567,7 @@ namespace ACNHPokerCore
             string savepath;
 
             if (config.AppSettings.Settings["LastLoad"].Value.Equals(string.Empty))
-                savepath = Directory.GetCurrentDirectory() + @"\save";
+                savepath = Directory.GetCurrentDirectory() + "\\" + Utilities.saveFolder;
             else
                 savepath = config.AppSettings.Settings["LastLoad"].Value;
 
@@ -1772,7 +1772,7 @@ namespace ACNHPokerCore
                 dodoSetup = new Dodo(s, false, debugging);
                 dodoSetup.CloseForm += DodoSetup_closeForm;
                 dodoSetup.AbortAll += DodoSetup_abortAll;
-                dodoSetup.updateTurnipPriceHandler += DodoSetup_updateTurnipPriceHandler;
+                dodoSetup.UpdateTurnipPriceHandler += DodoSetup_updateTurnipPriceHandler;
                 dodoSetup.Show(this);
                 dodoSetup.Location = new Point(Location.X - 590, Location.Y);
                 dodoSetup.ControlBox = false;
@@ -1797,7 +1797,7 @@ namespace ACNHPokerCore
 
         private void DodoSetup_updateTurnipPriceHandler()
         {
-            updateTurnipPriceHandler?.Invoke();
+            UpdateTurnipPriceHandler?.Invoke();
         }
 
         private void DodoSetup_abortAll()

@@ -2,14 +2,14 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net7.0-windows</TargetFramework>
+    <TargetFramework>net9.0-windows10.0.17763.0</TargetFramework>
 	<RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>NewLeaf.ico</ApplicationIcon>
     <DebugType>embedded</DebugType>
     <Authors>MyShiLingStar</Authors>
     <Company>MyShiLingStar</Company>
-    <Copyright>Copyright © 2020-2023</Copyright>
+    <Copyright>Copyright © 2020-2025</Copyright>
     <PackageProjectUrl>https://github.com/MyShiLingStar/ACNHPokerCore</PackageProjectUrl>
     <RepositoryUrl>https://github.com/MyShiLingStar/ACNHPokerCore</RepositoryUrl>
     <PackageIcon>Leaf.png</PackageIcon>
@@ -21,6 +21,7 @@
 	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 	<Configurations>Debug;Release;x86</Configurations>
 	<PlatformTarget>AnyCPU</PlatformTarget>
+	<ForceDesignerDpiUnaware>true</ForceDesignerDpiUnaware>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -45,21 +46,24 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Map\map.Designer.cs~RF7f8b1f.TMP" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="NewLeaf.ico" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AutoCompleteMenu-ScintillaNET" Version="2.1.1" />
-    <PackageReference Include="libc.hwid" Version="6.0.2" />
+    <PackageReference Include="libc.hwid" Version="7.0.0" />
     <PackageReference Include="LibUsbDotNet" Version="2.2.29" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.5" />
     <PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
-    <PackageReference Include="Microsoft.Windows.Compatibility" Version="8.0.10" />
+    <PackageReference Include="Microsoft.Windows.Compatibility" Version="9.0.5" />
     <PackageReference Include="NAudio" Version="2.2.1" />
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
-    <PackageReference Include="System.Drawing.Common" Version="8.0.10" />
-    <PackageReference Include="System.Runtime.Caching" Version="8.0.1" />
+    <PackageReference Include="System.Runtime.Caching" Version="9.0.5" />
     <PackageReference Include="WinFormsToggleSwitch" Version="1.1.0" />
   </ItemGroup>
 

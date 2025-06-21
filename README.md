@@ -1,5 +1,5 @@
 ## You can find the latest version of ACNHPokerCore : [🢧 Here 🢦](https://myshilingstar.github.io/GetAzure/)
-## You can find the latest x64 .NET 7.0 Desktop Runtime [🢧 Here 🢦](https://aka.ms/dotnet-core-applaunch?framework=Microsoft.WindowsDesktop.App&framework_version=7.0.0&arch=x64&rid=win10-x64&gui=true)
+## You can find the latest x64 .NET 9.0 Desktop Runtime [🢧 Here 🢦](https://aka.ms/dotnet-core-applaunch?framework=Microsoft.WindowsDesktop.App&framework_version=9.0.0&arch=x64&rid=win10-x64&gui=true)
 
 # ACNHPokerCore
 ![Release Image](https://user-images.githubusercontent.com/816502/189231022-02bfa2d8-1857-4b88-8edd-4a26a86a1c65.png)
@@ -20,7 +20,7 @@
 
 ## Installation
 
-   1. Download and install the x64 .NET 7.0 Desktop Runtime at [Here](https://aka.ms/dotnet-core-applaunch?framework=Microsoft.WindowsDesktop.App&framework_version=7.0.0&arch=x64&rid=win10-x64&gui=true). 
+   1. Download and install the x64 .NET 9.0 Desktop Runtime at [Here](https://aka.ms/dotnet-core-applaunch?framework=Microsoft.WindowsDesktop.App&framework_version=9.0.0&arch=x64&rid=win10-x64&gui=true). 
 
    2. Download and unzip the latest release of ACNHPokerCore at [Here](https://myshilingstar.github.io/GetAzure/)
 
@@ -68,10 +68,15 @@
 	* Added Hotkeys and MultiSelect when operating Bulk Selector.
 	* Fixed a crash related to some "hacky"	code in Bulldozer.
 	* Update for Game version "Ver. 2.0.6"
-	
-## Ely's Changes:   
+* R24
+	* Update for Game version "Ver. 2.0.7"
+	* Update from .NET 7.0 to .NET 9.0.
+	* Update for Game version "Ver. 2.0.8"
+
+## Ely's Changes:
+
 	* Added function to export cheat sheet (only first 40 Items cheats)to the inventory. (Beta)
-    * Added function to convert the inventory to cheat sheet txt.  
+    * Added function to convert the inventory to cheat sheet txt.
     * Added Auto-Refill Function and Switch to auto refill your inventory from the last nhi file you loaded. 
 	* Added Incoming Visitor logging
 	* Added Incoming Visitor captures  

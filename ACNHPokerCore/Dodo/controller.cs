@@ -638,9 +638,9 @@ namespace ACNHPokerCore
 
                     DiscordMessage msg = new()
                     {
-                        Content = content
+                        Content = content,
+                        Embeds = []
                     };
-                    msg.Embeds = new List<DiscordEmbed>();
                     msg.Embeds.Add(new DiscordEmbed()
                     {
                         Title = "New Dodo Code for " + IslandName + " :",
@@ -717,9 +717,9 @@ namespace ACNHPokerCore
 
                     DiscordMessage msg = new()
                     {
-                        Content = content
+                        Content = content,
+                        Embeds = []
                     };
-                    msg.Embeds = new List<DiscordEmbed>();
                     msg.Embeds.Add(new DiscordEmbed()
                     {
                         Title = "New Dodo Code for " + IslandName + " :",
@@ -760,7 +760,7 @@ namespace ACNHPokerCore
             string savepath;
 
             if (config.AppSettings.Settings["LastLoad"].Value.Equals(string.Empty))
-                savepath = Directory.GetCurrentDirectory() + @"\save";
+                savepath = Directory.GetCurrentDirectory() + "\\" + Utilities.saveFolder;
             else
                 savepath = config.AppSettings.Settings["LastLoad"].Value;
 
