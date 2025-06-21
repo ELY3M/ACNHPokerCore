@@ -54,15 +54,11 @@ jobs:
         
     - name: Output Artifact URL
       run:  echo 'Artifact URL is ${{ steps.upload.outputs.artifact-url }}'
-    
-    - name: list all dirs 
-      run: ls -R 
-        
+         
     - name: Get .NET Version 
       id: netversion    
       run: | 
-        dotnet msbuild ACNHPokerCore/ACNHPokerCore.csproj --getProperty:TargetFramework>netversion.txt   
-        cat netversion.txt
+        dotnet msbuild ACNHPokerCore/ACNHPokerCore.csproj --getProperty:TargetFramework>>netversion.txt   
         set /p NETVERSION=<netversion.txt
         echo %netversion%
         echo "NETVERSION=%netversion%" >> $GITHUB_ENV
@@ -70,7 +66,10 @@ jobs:
     - name: .NET Version test  
       run: | 
         echo $env:NETVERSION
-        
+
+    - name: list all dirs 
+      run: ls -R
+      
     - name: Create Release
       uses: actions/create-release@latest
       env:
