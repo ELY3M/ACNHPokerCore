@@ -45,7 +45,7 @@ jobs:
       id: upload
       with:
         name: Release
-        path: ${{ github.workspace }}\ACNHPokerCore\bin\Release\net7.0-windows\win-x64\publish\*
+        path: ${{ github.workspace }}\ACNHPokerCore\bin\Release\net9.0-windows\win-x64\publish\*
         overwrite: true
         retention-days: 1
 
@@ -70,7 +70,7 @@ jobs:
         body: ${{ github.event.head_commit.message }}
 
     - name: Zipping up Release folder
-      run: 7z a release.zip "${{ github.workspace }}\ACNHPokerCore\bin\Release\net7.0-windows\win-x64\publish\"
+      run: 7z a release.zip "${{ github.workspace }}\ACNHPokerCore\bin\Release\net9.0-windows\win-x64\publish\"
             
     - name: Upload Release
       uses: softprops/action-gh-release@v2
