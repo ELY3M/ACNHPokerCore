@@ -37,11 +37,12 @@ jobs:
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}} /t:Publish
 
+
+       # ${{ github.workspace }}\netversion.bat
     - name: Get .NET Version 
       id: netversion    
       run: | 
-        ${{ github.workspace }}\netversion.bat
-        set netversion<netversion.txt
+        FOR /F "delims=" %%i IN ('dotnet msbuild ACNHPokerCore/ACNHPokerCore.csproj --getProperty:TargetFramework') DO (SET netversion=%%i)
         echo %netversion%
         echo "NETVERSION=%netversion%" >> $GITHUB_ENV
         
