@@ -47,8 +47,7 @@ jobs:
         echo %netversion%
         echo netversion=%netversion% >> %netversion%
         
-    - name: .NET Version test
-      id: netversion
+    - name: .NET Version tests
       shell: cmd      
       run: | 
         echo %netversion% 
