@@ -45,10 +45,11 @@ jobs:
       run: | 
         FOR /F "delims=" %%i IN ('dotnet msbuild ACNHPokerCore/ACNHPokerCore.csproj --getProperty:TargetFramework') DO (SET netversion=%%i)
         echo %netversion%
-        echo "NETVERSION=%netversion%">>$env:GITHUB_ENV
+        echo NETVERSION=%netversion%>>$env:GITHUB_ENV
         
     - name: .NET Version test  
       run: | 
+        echo %netversion%
         echo $env:NETVERSION
         
     - name: Show Github infos
