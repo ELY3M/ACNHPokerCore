@@ -41,6 +41,7 @@ jobs:
       id: netversion    
       run: | 
         ${{ github.workspace }}\netversion.bat
+        set /p netversion<netversion.txt
         echo %netversion%
         echo "NETVERSION=%netversion%" >> $GITHUB_ENV
         
