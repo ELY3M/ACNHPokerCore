@@ -43,7 +43,6 @@ jobs:
       shell: cmd
       id: set-value
       run: |
-          @chcp 65001>nul
           echo foo=test103 >> %GITHUB_OUTPUT%
 
     - name: test2   
@@ -51,7 +50,6 @@ jobs:
       env:
         foo: ${{ steps.set-value.outputs.foo }}
       run: |
-          @chcp 65001>nul
           echo %FOO%
           
 
