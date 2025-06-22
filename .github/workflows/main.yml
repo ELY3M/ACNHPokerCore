@@ -36,7 +36,18 @@ jobs:
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}} /t:Publish
-      
+
+    - name: Get .NET Version 
+      id: netversion    
+      run: | 
+        ${{ github.workspace }}\netversion.bat
+        echo %netversion%
+        echo "NETVERSION=%netversion%" >> $GITHUB_ENV
+        
+    - name: .NET Version test  
+      run: | 
+        echo $env:NETVERSION
+        
     - name: Show Github infos
       run:  echo 'Workspace path ${{ github.workspace }} - runner.temp ${{ runner.temp }}'     
       
@@ -55,17 +66,6 @@ jobs:
     - name: Output Artifact URL
       run:  echo 'Artifact URL is ${{ steps.upload.outputs.artifact-url }}'
          
-    - name: Get .NET Version 
-      id: netversion    
-      run: | 
-        ${{ github.workspace }}\netversion.bat
-        echo %netversion%
-        echo "NETVERSION=%netversion%" >> $GITHUB_ENV
-        
-    - name: .NET Version test  
-      run: | 
-        echo $env:NETVERSION
-
     - name: list all dirs 
       run: ls -R
       
