@@ -58,8 +58,7 @@ jobs:
     - name: Get .NET Version 
       id: netversion    
       run: | 
-        dotnet msbuild ACNHPokerCore/ACNHPokerCore.csproj --getProperty:TargetFramework>>netversion.txt   
-        set /p NETVERSION=<netversion.txt
+        ${{ github.workspace }}\netversion.bat
         echo %netversion%
         echo "NETVERSION=%netversion%" >> $GITHUB_ENV
         
