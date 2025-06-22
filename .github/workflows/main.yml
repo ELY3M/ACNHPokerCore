@@ -51,6 +51,9 @@ jobs:
       run: | 
         echo %netversion%
         echo $env:NETVERSION
+
+    - name: List environment variables
+      run: env
         
     - name: Show Github infos
       run:  echo 'Workspace path ${{ github.workspace }} - runner.temp ${{ runner.temp }}'     
