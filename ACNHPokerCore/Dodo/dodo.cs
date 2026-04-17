@@ -1611,7 +1611,7 @@ namespace ACNHPokerCore
                             {
                                 Thread.Sleep(1000);
                                 Controller.ClickCAPTURE();
-                                for (int capturecount = 0; capturecount < 40; capturecount++)
+                                for (int capturecount = 0; capturecount < 60; capturecount++)
                                 {
                                     Thread.Sleep(1000);
                                     Controller.ClickCAPTURE();
