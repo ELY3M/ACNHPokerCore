@@ -49,8 +49,16 @@ jobs:
       run: | 
         echo ${{ steps.netversion.outputs.netversion }}
 
+    - name: copy csv files  
+      run: | 
+        robocopy ${{ github.workspace }}\ACNHPokerCore\csv ${{ github.workspace }}\ACNHPokerCore\bin\Release\${{ steps.netversion.outputs.netversion }}\win-x64\publish\csv        
+
+
     - name: Show Github infos
       run:  echo 'Workspace path ${{ github.workspace }} - runner.temp ${{ runner.temp }}'     
+
+
+     
       
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
