@@ -5,14 +5,14 @@
     <TargetFramework>net9.0-windows10.0.17763.0</TargetFramework>
 	<RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <UseWindowsForms>true</UseWindowsForms>
-    <ApplicationIcon>NewLeaf.ico</ApplicationIcon>
+    <ApplicationIcon>ElysLeaf.ico</ApplicationIcon>
     <DebugType>embedded</DebugType>
     <Authors>MyShiLingStar</Authors>
     <Company>MyShiLingStar</Company>
     <Copyright>Copyright © 2020-2025</Copyright>
-    <PackageProjectUrl>https://github.com/MyShiLingStar/ACNHPokerCore</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/MyShiLingStar/ACNHPokerCore</RepositoryUrl>
-    <PackageIcon>Leaf.png</PackageIcon>
+    <PackageProjectUrl>https://github.com/ELY3M/ACNHPokerCore</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ELY3M/ACNHPokerCore</RepositoryUrl>
+    <PackageIcon>ElysLeaf.png</PackageIcon>
     <RepositoryType>git</RepositoryType>
     <NeutralLanguage>en-US</NeutralLanguage>
     <Platforms>AnyCPU</Platforms>
@@ -56,7 +56,6 @@
   <ItemGroup>
     <PackageReference Include="AutoCompleteMenu-ScintillaNET" Version="2.1.1" />
     <PackageReference Include="libc.hwid" Version="7.0.0" />
-    <PackageReference Include="LibUsbDotNet" Version="2.2.29" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.5" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.5" />
     <PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />

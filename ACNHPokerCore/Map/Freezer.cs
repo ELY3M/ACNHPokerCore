@@ -255,8 +255,8 @@ namespace ACNHPokerCore
 
         private void FreezeInvBtn_Click(object sender, EventArgs e)
         {
-            byte[] Bank01to20 = Utilities.GetInventoryBank(s, null, 1);
-            byte[] Bank21to40 = Utilities.GetInventoryBank(s, null, 21);
+            byte[] Bank01to20 = Utilities.GetInventoryBank(s, 1);
+            byte[] Bank21to40 = Utilities.GetInventoryBank(s, 21);
 
             Utilities.SendString(s, Utilities.Freeze(Utilities.ItemSlotBase, Bank01to20));
             Utilities.SendString(s, Utilities.Freeze(Utilities.ItemSlot21Base, Bank21to40));
@@ -509,9 +509,9 @@ namespace ACNHPokerCore
             {
                 counter = 0;
 
-                byte[] Acre = Utilities.GetAcre(s, null);
-                byte[] Building = Utilities.GetBuilding(s, null);
-                byte[] Terrain = Utilities.GetTerrain(s, null);
+                byte[] Acre = Utilities.GetAcre(s);
+                byte[] Building = Utilities.GetBuilding(s);
+                byte[] Terrain = Utilities.GetTerrain(s);
                 byte[] MapCustomDesgin = null; //Utilities.GetCustomDesignMap(s, null, ref counter);
 
                 if (MiniMap == null)
@@ -849,8 +849,8 @@ namespace ACNHPokerCore
 
             for (int i = 0; i < 10; i++)
             {
-                villager[i] = Utilities.GetVillager(s, null, i, 0x3);
-                villagerFlag[i] = Utilities.GetMoveout(s, null, i, 0x33);
+                villager[i] = Utilities.GetVillager(s, i, 0x3);
+                villagerFlag[i] = Utilities.GetMoveout(s, i, 0x33);
                 haveVillager[i] = MapRegenerator.CheckHaveVillager(villager[i]);
                 if (haveVillager[i])
                 {
@@ -915,21 +915,21 @@ namespace ACNHPokerCore
             for (int i = 0; i < 10; i++)
             {
                 // Set every one to irregular move out
-                Utilities.SetMoveout(s, null, i, "2", "0");
-                villagerFlag[i] = Utilities.GetMoveout(s, null, i, 0x33);
+                Utilities.SetMoveout(s, i, "2", "0");
+                villagerFlag[i] = Utilities.GetMoveout(s, i, 0x33);
                 if (i > 0) // Freeze all other 9 villagers' flag
                     Utilities.FreezeBig(s, (uint)(Utilities.VillagerAddress + (i * Utilities.VillagerSize) + Utilities.VillagerMoveoutOffset), villagerFlag[i], (uint)villagerFlag[i].Length);
             }
 
 
             // Freeze the first villager and his/her house
-            byte[] VillagerData = Utilities.GetVillager(s, null, 0, (int)Utilities.VillagerSize, ref counter);
+            byte[] VillagerData = Utilities.GetVillager(s, 0, (int)Utilities.VillagerSize, ref counter);
 
             int[] HouseList = new int[10];
 
             for (int i = 0; i < 10; i++)
             {
-                byte b = Utilities.GetHouseOwner(s, null, i, ref counter);
+                byte b = Utilities.GetHouseOwner(s, i, ref counter);
                 HouseList[i] = Convert.ToInt32(b);
             }
 
@@ -939,7 +939,7 @@ namespace ACNHPokerCore
             };
 
 
-            byte[] HouseData = Utilities.GetHouse(s, null, V.HouseIndex, ref counter);
+            byte[] HouseData = Utilities.GetHouse(s, V.HouseIndex, ref counter);
 
             byte[] head = new byte[0x2F83];
             byte[] tail = new byte[0xBB6];
@@ -984,7 +984,7 @@ namespace ACNHPokerCore
 
             for (int i = 0; i < 10; i++)
             {
-                byte b = Utilities.GetHouseOwner(s, null, i, ref counter);
+                byte b = Utilities.GetHouseOwner(s, i, ref counter);
                 HouseList[i] = Convert.ToInt32(b);
             }
 

@@ -468,9 +468,9 @@ namespace ACNHPokerCore
                     {
                         counter = 0;
 
-                        byte[] Acre = Utilities.GetAcre(s, null);
-                        byte[] Building = Utilities.GetBuilding(s, null);
-                        byte[] Terrain = Utilities.GetTerrain(s, null);
+                        byte[] Acre = Utilities.GetAcre(s);
+                        byte[] Building = Utilities.GetBuilding(s);
+                        byte[] Terrain = Utilities.GetTerrain(s);
                         byte[] MapCustomDesgin = null; //Utilities.GetCustomDesignMap(s, null, ref counter);
 
                         if (MiniMap == null)
@@ -1713,8 +1713,8 @@ namespace ACNHPokerCore
 
             for (int i = 0; i < 10; i++)
             {
-                villager[i] = Utilities.GetVillager(s, null, i, 0x3);
-                villagerFlag[i] = Utilities.GetMoveout(s, null, i, 0x33);
+                villager[i] = Utilities.GetVillager(s, i, 0x3);
+                villagerFlag[i] = Utilities.GetMoveout(s, i, 0x33);
                 haveVillager[i] = CheckHaveVillager(villager[i]);
             }
             WriteVillager(villager, haveVillager);
@@ -1726,8 +1726,8 @@ namespace ACNHPokerCore
                 PrepareVillager(s);
             else
             {
-                villager[index] = Utilities.GetVillager(s, null, index, 0x3);
-                villagerFlag[index] = Utilities.GetMoveout(s, null, index, 0x33);
+                villager[index] = Utilities.GetVillager(s, index, 0x3);
+                villagerFlag[index] = Utilities.GetMoveout(s, index, 0x33);
                 haveVillager[index] = true;
 
                 WriteVillager(villager, haveVillager);
@@ -1762,10 +1762,10 @@ namespace ACNHPokerCore
             }
             else
             {
-                string ByteString = Utilities.ByteToHexString(Utilities.GetMoveout(s, null, index, 0x33, ref counter));
+                string ByteString = Utilities.ByteToHexString(Utilities.GetMoveout(s, index, 0x33, ref counter));
                 if (!ByteString.Equals(Utilities.ByteToHexString(villagerFlag)))
                 {
-                    Utilities.SetMoveout(s, null, index, villagerFlag, ref counter);
+                    Utilities.SetMoveout(s, index, villagerFlag, ref counter);
                     Debug.Print("Reset Villager " + index);
                     MyLog.LogEvent("Regen", "Villager Reset : " + index);
                 }
@@ -1791,7 +1791,7 @@ namespace ACNHPokerCore
                     continue;
                 }
                 else
-                    newVisitorList[i] = Utilities.GetVisitorNameFromList(s, null, i);
+                    newVisitorList[i] = Utilities.GetVisitorNameFromList(s, i);
 
                 if (newVisitorList[i].Equals(string.Empty))
                     sw.WriteLine("[Empty]");

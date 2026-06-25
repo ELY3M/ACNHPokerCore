@@ -1669,19 +1669,10 @@ namespace ACNHPokerCore
             // 
             // USBConnectionButton
             // 
-            USBConnectionButton.BackColor = System.Drawing.Color.FromArgb(114, 137, 218);
-            USBConnectionButton.FlatAppearance.BorderSize = 0;
-            USBConnectionButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            USBConnectionButton.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold);
-            USBConnectionButton.ForeColor = System.Drawing.Color.White;
-            USBConnectionButton.Location = new System.Drawing.Point(28, 25);
+            USBConnectionButton.Location = new System.Drawing.Point(0, 0);
             USBConnectionButton.Name = "USBConnectionButton";
-            USBConnectionButton.Size = new System.Drawing.Size(85, 23);
-            USBConnectionButton.TabIndex = 1;
-            USBConnectionButton.Tag = "connect";
-            USBConnectionButton.Text = "USB";
-            USBConnectionButton.UseVisualStyleBackColor = false;
-            USBConnectionButton.Click += USBConnectionButton_Click;
+            USBConnectionButton.Size = new System.Drawing.Size(75, 23);
+            USBConnectionButton.TabIndex = 28;
             // 
             // MapDropperButton
             // 
@@ -1909,7 +1900,7 @@ namespace ACNHPokerCore
             SettingButton.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold);
             SettingButton.ForeColor = System.Drawing.Color.White;
             SettingButton.Image = Properties.Resources.gear;
-            SettingButton.Location = new System.Drawing.Point(1, 12);
+            SettingButton.Location = new System.Drawing.Point(2, -1);
             SettingButton.Name = "SettingButton";
             SettingButton.Size = new System.Drawing.Size(25, 25);
             SettingButton.TabIndex = 8;
@@ -2728,14 +2719,14 @@ namespace ACNHPokerCore
             ItemRightClick.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { copyItemToolStripMenuItem, deleteItemToolStripMenuItem, wrapItemToolStripMenuItem, wrapAllItemsToolStripMenuItem, addToFavoriteToolStripMenuItem, unwrapAllItemsToolStripMenuItem });
             ItemRightClick.Name = "ItemRightClick";
             ItemRightClick.ShowImageMargin = false;
-            ItemRightClick.Size = new System.Drawing.Size(167, 136);
+            ItemRightClick.Size = new System.Drawing.Size(175, 136);
             // 
             // copyItemToolStripMenuItem
             // 
             copyItemToolStripMenuItem.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold);
             copyItemToolStripMenuItem.ForeColor = System.Drawing.Color.White;
             copyItemToolStripMenuItem.Name = "copyItemToolStripMenuItem";
-            copyItemToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
+            copyItemToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
             copyItemToolStripMenuItem.Text = "Copy Item";
             copyItemToolStripMenuItem.Click += CopyItemToolStripMenuItem_Click;
             // 
@@ -2744,7 +2735,7 @@ namespace ACNHPokerCore
             deleteItemToolStripMenuItem.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold);
             deleteItemToolStripMenuItem.ForeColor = System.Drawing.Color.White;
             deleteItemToolStripMenuItem.Name = "deleteItemToolStripMenuItem";
-            deleteItemToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
+            deleteItemToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
             deleteItemToolStripMenuItem.Text = "Delete Item";
             deleteItemToolStripMenuItem.Click += DeleteItemToolStripMenuItem_Click;
             // 
@@ -2753,7 +2744,7 @@ namespace ACNHPokerCore
             wrapItemToolStripMenuItem.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold);
             wrapItemToolStripMenuItem.ForeColor = System.Drawing.Color.White;
             wrapItemToolStripMenuItem.Name = "wrapItemToolStripMenuItem";
-            wrapItemToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
+            wrapItemToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
             wrapItemToolStripMenuItem.Text = "Wrap Item [ ! ]";
             wrapItemToolStripMenuItem.Click += WrapItemToolStripMenuItem_Click;
             // 
@@ -2762,7 +2753,7 @@ namespace ACNHPokerCore
             wrapAllItemsToolStripMenuItem.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold);
             wrapAllItemsToolStripMenuItem.ForeColor = System.Drawing.Color.White;
             wrapAllItemsToolStripMenuItem.Name = "wrapAllItemsToolStripMenuItem";
-            wrapAllItemsToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
+            wrapAllItemsToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
             wrapAllItemsToolStripMenuItem.Text = "Wrap All Items [ ! ]";
             wrapAllItemsToolStripMenuItem.Click += WrapAllItemsToolStripMenuItem_Click;
             // 
@@ -2771,7 +2762,7 @@ namespace ACNHPokerCore
             addToFavoriteToolStripMenuItem.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold);
             addToFavoriteToolStripMenuItem.ForeColor = System.Drawing.Color.White;
             addToFavoriteToolStripMenuItem.Name = "addToFavoriteToolStripMenuItem";
-            addToFavoriteToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
+            addToFavoriteToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
             addToFavoriteToolStripMenuItem.Text = "Add To Favorite";
             addToFavoriteToolStripMenuItem.Click += AddToFavoriteToolStripMenuItem_Click;
             // 
@@ -2780,7 +2771,7 @@ namespace ACNHPokerCore
             unwrapAllItemsToolStripMenuItem.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold);
             unwrapAllItemsToolStripMenuItem.ForeColor = System.Drawing.Color.White;
             unwrapAllItemsToolStripMenuItem.Name = "unwrapAllItemsToolStripMenuItem";
-            unwrapAllItemsToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
+            unwrapAllItemsToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
             unwrapAllItemsToolStripMenuItem.Text = "Unwrap All Items";
             unwrapAllItemsToolStripMenuItem.Click += UnwrapAllItemsToolStripMenuItem_Click;
             // 
@@ -3530,7 +3521,7 @@ namespace ACNHPokerCore
             FavGridRightClick.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { deletedSelectedToolStripMenuItem });
             FavGridRightClick.Name = "FavGridRightClick";
             FavGridRightClick.ShowImageMargin = false;
-            FavGridRightClick.Size = new System.Drawing.Size(159, 26);
+            FavGridRightClick.Size = new System.Drawing.Size(167, 26);
             // 
             // deletedSelectedToolStripMenuItem
             // 
@@ -3538,7 +3529,7 @@ namespace ACNHPokerCore
             deletedSelectedToolStripMenuItem.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold);
             deletedSelectedToolStripMenuItem.ForeColor = System.Drawing.Color.White;
             deletedSelectedToolStripMenuItem.Name = "deletedSelectedToolStripMenuItem";
-            deletedSelectedToolStripMenuItem.Size = new System.Drawing.Size(158, 22);
+            deletedSelectedToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
             deletedSelectedToolStripMenuItem.Text = "Deleted Selected";
             deletedSelectedToolStripMenuItem.Click += DeletedSelectedToolStripMenuItem_Click;
             // 
@@ -5836,7 +5827,7 @@ namespace ACNHPokerCore
             // 
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             BackColor = System.Drawing.Color.FromArgb(54, 57, 63);
-            ClientSize = new System.Drawing.Size(1204, 516);
+            ClientSize = new System.Drawing.Size(1212, 520);
             Controls.Add(Fill2Button);
             Controls.Add(Chase2Btn);
             Controls.Add(PokeMButton);

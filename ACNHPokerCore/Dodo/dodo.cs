@@ -1335,7 +1335,7 @@ namespace ACNHPokerCore
             {
                 if (i == 0)
                     continue;
-                namelist[i] = Utilities.GetVisitorNameFromList(s, null, i);
+                namelist[i] = Utilities.GetVisitorNameFromList(s, i);
                 if (!namelist[i].Equals(string.Empty))
                     num++;
             }
@@ -1580,7 +1580,7 @@ namespace ACNHPokerCore
                     continue;
                 }
                 else
-                    newVisitorList[i] = Utilities.GetVisitorNameFromList(s, null, i);
+                    newVisitorList[i] = Utilities.GetVisitorNameFromList(s, i);
 
                 if (newVisitorList[i].Equals(string.Empty))
                     sw.WriteLine("[Empty]");
@@ -2027,7 +2027,7 @@ namespace ACNHPokerCore
 
         private void ClearInvBtn_Click(object sender, EventArgs e)
         {
-            Utilities.DeleteSlot(s, null, 0);
+            Utilities.DeleteSlot(s, 0);
             WriteLog("First inventory slot cleared!", true);
             WriteLog("Please remember to reset your cursor to the first inventory slot for the drop bot to function properly!", true);
         }

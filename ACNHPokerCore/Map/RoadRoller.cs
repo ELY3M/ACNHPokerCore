@@ -17,7 +17,6 @@ namespace ACNHPokerCore
     public partial class RoadRoller : Form
     {
         private readonly Socket socket;
-        private readonly USBBot usb;
         private readonly bool sound;
         private readonly bool debugging;
 
@@ -99,10 +98,9 @@ namespace ACNHPokerCore
         private readonly string debugDesign = @"YourCustomDesignMap.nhdm";
 
 
-        public RoadRoller(Socket S, USBBot USB, bool Sound, bool Debugging)
+        public RoadRoller(Socket S, bool Sound, bool Debugging)
         {
             socket = S;
-            usb = USB;
             sound = Sound;
             debugging = Debugging;
             InitializeComponent();
@@ -621,14 +619,14 @@ namespace ACNHPokerCore
         {
             try
             {
-                if (socket != null || usb != null || Utilities.isEmulator)
+                if (socket != null || Utilities.isEmulator)
                 {
-                    Layer1 = Utilities.GetMapLayer(socket, usb, Utilities.mapZero, ref counter);
-                    Acre = Utilities.GetAcre(socket, usb);
-                    Building = Utilities.GetBuilding(socket, usb);
-                    Terrain = Utilities.GetTerrain(socket, usb);
-                    MyDesign = Utilities.GetMyDesign(socket, usb, ref counter);
-                    MapCustomDesgin = Utilities.GetCustomDesignMap(socket, usb, ref counter);
+                    Layer1 = Utilities.GetMapLayer(socket, Utilities.mapZero, ref counter);
+                    Acre = Utilities.GetAcre(socket);
+                    Building = Utilities.GetBuilding(socket);
+                    Terrain = Utilities.GetTerrain(socket);
+                    MyDesign = Utilities.GetMyDesign(socket, ref counter);
+                    MapCustomDesgin = Utilities.GetCustomDesignMap(socket, ref counter);
 
                     if (Acre != null)
                     {
@@ -2723,7 +2721,7 @@ namespace ACNHPokerCore
             int c = 0;
             int timeNeeded = 10;
 
-            while (Utilities.IsAboutToSave(socket, null, timeNeeded))
+            while (Utilities.IsAboutToSave(socket, timeNeeded))
             {
                 if (c > timeNeeded + 5)
                     break;
@@ -2735,13 +2733,13 @@ namespace ACNHPokerCore
 
             counter = 0;
 
-            Utilities.SendTerrain(socket, null, newTerrain, ref counter);
+            Utilities.SendTerrain(socket, newTerrain, ref counter);
 
             if (haveCustomEdit)
             {
                 if (oldCustomMap != null)
                 {
-                    Utilities.SendOldCustomMap(socket, null, oldCustomMap, ref counter);
+                    Utilities.SendOldCustomMap(socket, oldCustomMap, ref counter);
                 }
             }
 

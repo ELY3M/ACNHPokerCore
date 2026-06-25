@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -587,7 +586,7 @@ namespace ACNHPokerCore
             return newArray;
         }
 
-        public static byte[] GetInventoryBank(Socket socket, USBBot usb, int slot)
+        public static byte[] GetInventoryBank(Socket socket, int slot)
         {
             if (isEmulator)
             {
@@ -596,8 +595,6 @@ namespace ACNHPokerCore
 
             lock (botLock)
             {
-                if (usb == null)
-                {
                     Debug.Print("[Sys] Peek : Inventory " + GetItemSlotUIntAddress(slot).ToString("X") + " " + slot);
 
                     byte[] b = ReadByteArray(socket, GetItemSlotUIntAddress(slot), 160);
@@ -608,34 +605,25 @@ namespace ACNHPokerCore
                     }
 
                     return b;
-                }
-                else
-                {
-                    Debug.Print("[Usb] Peek : Inventory " + GetItemSlotUIntAddress(slot).ToString("X") + " " + slot);
 
-                    byte[] b = usb.ReadBytes(GetItemSlotUIntAddress(slot), 160);
-
-                    if (b == null)
-                    {
-                        MessageBox.Show("Wait something is wrong here!? \n\n GetItemSlotUIntAddress(" + slot + ")");
-                    }
-
-                    return b;
-                }
             }
         }
 
-        public static byte[] GetInventoryName(Socket socket, USBBot usb, int playerNumber)
+        public static byte[] GetInventoryName(Socket socket, int playerNumber)
         {
             if (isEmulator)
             {
                 return ReadEmulatorMemory((uint)(player1SlotBase + (playerNumber * playerOffset)) - InventoryNameOffset, 0x34);
             }
 
-            return PeekAddress(socket, usb, (uint)(player1SlotBase + (playerNumber * playerOffset)) - InventoryNameOffset, 0x34);
+            return PeekAddress(socket, (uint)(player1SlotBase + (playerNumber * playerOffset)) - InventoryNameOffset, 0x34);
         }
 
-        public static void SpawnItem(Socket socket, USBBot usb, int slot, String value, String amount)
+
+
+
+
+        public static void SpawnItem(Socket socket, int slot, String value, String amount)
         {
             byte[] b = Add(StringToByte(Flip(PrecedingZeros(value, 8))), StringToByte(Flip(PrecedingZeros(amount, 8))));
 
@@ -649,8 +637,6 @@ namespace ACNHPokerCore
             {
                 try
                 {
-                    if (usb == null)
-                    {
                         SendByteArray(socket, GetItemSlotUIntAddress(slot), b, b.Length);
 
                         /*
@@ -660,11 +646,7 @@ namespace ACNHPokerCore
                         string countMsg = String.Format("poke {0:X8} 0x{1}\r\n", GetItemCountAddress(slot), Flip(PrecedingZeros(amount, 8)));
                         SendString(socket, Encoding.UTF8.GetBytes(countMsg));
                         */
-                    }
-                    else
-                    {
-                        usb.WriteBytes(b, GetItemSlotUIntAddress(slot));
-                    }
+                   
                 }
                 catch
                 {
@@ -673,7 +655,7 @@ namespace ACNHPokerCore
             }
         }
 
-        public static void SpawnRecipe(Socket socket, USBBot usb, int slot, String value, String recipeValue)
+        public static void SpawnRecipe(Socket socket, int slot, String value, String recipeValue)
         {
             byte[] b = Add(StringToByte(Flip(PrecedingZeros(value, 8))), StringToByte(Flip(PrecedingZeros(recipeValue, 8))));
 
@@ -688,8 +670,6 @@ namespace ACNHPokerCore
             {
                 try
                 {
-                    if (usb == null)
-                    {
                         SendByteArray(socket, GetItemSlotUIntAddress(slot), b, b.Length);
                         /*
                         string msg = String.Format("poke {0:X8} 0x{1}\r\n", GetItemSlotAddress(slot), Flip(PrecedingZeros(value, 8)));
@@ -698,11 +678,6 @@ namespace ACNHPokerCore
                         string countMsg = String.Format("poke {0:X8} 0x{1}\r\n", GetItemCountAddress(slot), Flip(PrecedingZeros(recipeValue, 8)));
                         SendString(socket, Encoding.UTF8.GetBytes(countMsg));
                         */
-                    }
-                    else
-                    {
-                        usb.WriteBytes(b, GetItemSlotUIntAddress(slot));
-                    }
                 }
                 catch
                 {
@@ -711,7 +686,7 @@ namespace ACNHPokerCore
             }
         }
 
-        public static void SpawnFlower(Socket socket, USBBot usb, int slot, String value, String flowerValue)
+        public static void SpawnFlower(Socket socket, int slot, String value, String flowerValue)
         {
             byte[] b = Add(StringToByte(Flip(PrecedingZeros(value, 8))), StringToByte(Flip(PrecedingZeros(flowerValue, 8))));
 
@@ -725,8 +700,6 @@ namespace ACNHPokerCore
             {
                 try
                 {
-                    if (usb == null)
-                    {
                         SendByteArray(socket, GetItemSlotUIntAddress(slot), b, b.Length);
 
                         /*
@@ -736,11 +709,6 @@ namespace ACNHPokerCore
                         string countMsg = String.Format("poke {0:X8} 0x{1}\r\n", GetItemCountAddress(slot), Flip(PrecedingZeros(flowerValue, 8)));
                         SendString(socket, Encoding.UTF8.GetBytes(countMsg));
                         */
-                    }
-                    else
-                    {
-                        usb.WriteBytes(b, GetItemSlotUIntAddress(slot));
-                    }
 
                 }
                 catch
@@ -791,12 +759,12 @@ namespace ACNHPokerCore
                 return value.Substring(value.Length - 4, 4);
         }
 
-        public static void DeleteSlot(Socket socket, USBBot usb, int slot)
+        public static void DeleteSlot(Socket socket, int slot)
         {
-            SpawnItem(socket, usb, slot, "FFFE", "0");
+            SpawnItem(socket, slot, "FFFE", "0");
         }
 
-        public static void OverwriteAll(Socket socket, USBBot usb, byte[] buffer1, byte[] buffer2, ref int counter)
+        public static void OverwriteAll(Socket socket, byte[] buffer1, byte[] buffer2, ref int counter)
         {
             if (isEmulator)
             {
@@ -808,20 +776,12 @@ namespace ACNHPokerCore
 
             lock (botLock)
             {
-                if (usb == null)
-                {
                     SendByteArray(socket, GetItemSlotUIntAddress(1), buffer1, 160, ref counter);
                     SendByteArray(socket, GetItemSlotUIntAddress(21), buffer2, 160, ref counter);
-                }
-                else
-                {
-                    usb.WriteBytes(buffer1, GetItemSlotUIntAddress(1));
-                    usb.WriteBytes(buffer2, GetItemSlotUIntAddress(21));
-                }
             }
         }
 
-        public static UInt64[] GetTurnipPrices(Socket socket, USBBot usb)
+        public static UInt64[] GetTurnipPrices(Socket socket)
         {
             if (isEmulator)
             {
@@ -846,8 +806,6 @@ namespace ACNHPokerCore
             lock (botLock)
             {
                 UInt64[] result = new UInt64[13];
-                if (usb == null)
-                {
                     Debug.Print("[Sys] Peek : TurnipPurchasePrice " + TurnipPurchasePriceAddr.ToString("X"));
 
                     ReadUInt64Array(socket, TurnipPurchasePriceAddr, result, 4, 12);
@@ -855,29 +813,12 @@ namespace ACNHPokerCore
                     Debug.Print("[Sys] Peek : TurnipSellPriceAddr " + TurnipSellPriceAddr.ToString("X"));
 
                     ReadUInt64Array(socket, TurnipSellPriceAddr, result, 4 * 12, 0);
-                }
-                else
-                {
-                    Debug.Print("[Usb] Peek : TurnipPrice " + TurnipPurchasePriceAddr.ToString("X") + " " + TurnipSellPriceAddr.ToString("X"));
 
-                    byte[] b = usb.ReadBytes(TurnipPurchasePriceAddr, 60);
-
-                    byte[] BuyTemp = new byte[4];
-                    Buffer.BlockCopy(b, 0, BuyTemp, 0, 4);
-                    result[12] = BitConverter.ToUInt32(BuyTemp, 0);
-
-                    for (int i = 0; i < 12; i++)
-                    {
-                        byte[] SellTemp = new byte[4];
-                        Buffer.BlockCopy(b, 12 + (i * 4), SellTemp, 0, 4);
-                        result[i] = BitConverter.ToUInt32(SellTemp, 0);
-                    }
-                }
                 return result;
             }
         }
 
-        public static void ChangeTurnipPrices(Socket socket, USBBot usb, UInt32[] prices)
+        public static void ChangeTurnipPrices(Socket socket, UInt32[] prices)
         {
             if (isEmulator)
             {
@@ -898,28 +839,11 @@ namespace ACNHPokerCore
 
             lock (botLock)
             {
-                if (usb == null)
-                {
                     SendUInt32Array(socket, TurnipPurchasePriceAddr, prices, 4, 12);
                     SendUInt32Array(socket, TurnipPurchasePriceAddr + SaveFileBuffer, prices, 4, 12);
                     SendUInt32Array(socket, TurnipSellPriceAddr, prices, 4 * 12);
                     SendUInt32Array(socket, TurnipSellPriceAddr + SaveFileBuffer, prices, 4 * 12);
-                }
-                else
-                {
-                    byte[] BuyPrice = StringToByte(Flip(PrecedingZeros(prices[12].ToString("X"), 8)));
-                    usb.WriteBytes(BuyPrice, TurnipPurchasePriceAddr);
-                    usb.WriteBytes(BuyPrice, TurnipPurchasePriceAddr + SaveFileBuffer);
 
-                    byte[] SellPrice = [];
-
-                    for (int i = 0; i < 12; i++)
-                    {
-                        SellPrice = Add(SellPrice, StringToByte(Flip(PrecedingZeros(prices[i].ToString("X"), 8))));
-                    }
-                    usb.WriteBytes(SellPrice, TurnipSellPriceAddr);
-                    usb.WriteBytes(SellPrice, TurnipSellPriceAddr + SaveFileBuffer);
-                }
                 return;
             }
         }
@@ -1059,14 +983,12 @@ namespace ACNHPokerCore
         }
 
         #region Peek & Poke
-        public static byte[] PeekAddress(Socket socket, USBBot usb, UInt32 address, int size)
+        public static byte[] PeekAddress(Socket socket, UInt32 address, int size)
         {
             lock (botLock)
             {
                 try
                 {
-                    if (usb == null)
-                    {
                         Debug.Print("[Sys] Peek : Address " + address.ToString("X") + " " + size);
 
                         byte[] b = ReadByteArray(socket, address, size);
@@ -1077,20 +999,7 @@ namespace ACNHPokerCore
                         }
 
                         return b;
-                    }
-                    else
-                    {
-                        Debug.Print("[Usb] Peek : Address " + address.ToString("X") + " " + size);
 
-                        byte[] b = usb.ReadBytes(address, size);
-
-                        if (b == null)
-                        {
-                            MessageBox.Show("Wait something is wrong here!? \n\n peek " + address);
-                        }
-
-                        return b;
-                    }
                 }
                 catch
                 {
@@ -1100,22 +1009,15 @@ namespace ACNHPokerCore
             }
         }
 
-        public static void PokeAddress(Socket socket, USBBot usb, string address, string value)
+        public static void PokeAddress(Socket socket, string address, string value)
         {
             lock (botLock)
             {
                 try
                 {
-                    if (usb == null)
-                    {
                         string msg = String.Format("poke 0x{0:X8} {1}\r\n", address, "0x" + value);
                         Debug.Print("Poke : " + msg);
                         SendString(socket, Encoding.UTF8.GetBytes(msg));
-                    }
-                    else
-                    {
-                        usb.WriteBytes(StringToByte(value), Convert.ToUInt32(address, 16));
-                    }
                 }
                 catch
                 {
@@ -1124,23 +1026,15 @@ namespace ACNHPokerCore
             }
         }
 
-        public static void PokeMainAddress(Socket socket, USBBot usb, string address, string value)
+        public static void PokeMainAddress(Socket socket, string address, string value)
         {
             lock (botLock)
             {
                 try
                 {
-                    if (usb == null)
-                    {
                         string msg = String.Format("pokeMain 0x{0:X8} 0x{1}\r\n", address, Flip(value));
                         Debug.Print("PokeMain : " + msg);
                         SendString(socket, Encoding.UTF8.GetBytes(msg));
-                    }
-                    else
-                    {
-                        usb.WriteBytesMain(StringToByte(Flip(value)), Convert.ToUInt32(address, 16));
-                        Debug.Print("PokeMain [USB] : " + Convert.ToUInt32(address, 16) + " " + Flip(value));
-                    }
                 }
                 catch
                 {
@@ -1172,14 +1066,12 @@ namespace ACNHPokerCore
             }
         }
 
-        public static byte[] PeekMainAddress(Socket socket, USBBot usb, UInt32 address, int size)
+        public static byte[] PeekMainAddress(Socket socket, UInt32 address, int size)
         {
             lock (botLock)
             {
                 try
                 {
-                    if (usb == null)
-                    {
                         Debug.Print("[Sys] PeekMain : Address " + address.ToString("X") + " " + size);
 
                         byte[] b = ReadMainByteArray(socket, address, size);
@@ -1190,18 +1082,7 @@ namespace ACNHPokerCore
                         }
 
                         return b;
-                    }
-                    else
-                    {
-                        byte[] b = usb.ReadBytesMain(address, size);
 
-                        if (b == null)
-                        {
-                            MessageBox.Show("Wait something is wrong here!? \n\n peek " + address);
-                        }
-
-                        return b;
-                    }
                 }
                 catch
                 {
@@ -1455,7 +1336,9 @@ namespace ACNHPokerCore
             return received;
         }
 
-        private static byte[] ReadLargeBytes(USBBot usb, uint address, int size)
+
+        /*
+        private static byte[] ReadLargeBytes(uint address, int size)
         {
             // Read in small chunks
             byte[] result = new byte[size];
@@ -1475,7 +1358,7 @@ namespace ACNHPokerCore
             return result;
         }
 
-        private static byte[] ReadLargeBytes(USBBot usb, uint address, int size, ref int counter)
+        private static byte[] ReadLargeBytes(uint address, int size, ref int counter)
         {
             // Read in small chunks
             byte[] result = new byte[size];
@@ -1495,7 +1378,7 @@ namespace ACNHPokerCore
             }
             return result;
         }
-
+        
         private static void WriteLargeBytes(USBBot usb, long initAddr, byte[] buffer, int size, ref int counter)
         {
 
@@ -1511,13 +1394,13 @@ namespace ACNHPokerCore
                 {
                     temp[i] = buffer[sent + i];
                 }
-                /*
-                for (int i = 0; i < bytesToSend; i++)
-                {
-                    dataTemp.Append(String.Format("{0:X2}", buffer[sent + i]));
-                }
+                
+                //for (int i = 0; i < bytesToSend; i++)
+                //{
+                //    dataTemp.Append(String.Format("{0:X2}", buffer[sent + i]));
+                //}
                 msg = String.Format("poke 0x{0:X8} 0x{1}\r\n", initAddr + sent, dataTemp.ToString());
-                */
+                
                 //Debug.Print(msg);
                 //SendString(socket, Encoding.UTF8.GetBytes(msg));
                 usb.WriteBytes(temp, (uint)(initAddr + sent));
@@ -1525,6 +1408,10 @@ namespace ACNHPokerCore
                 counter++;
             }
         }
+
+*/
+
+
 
         public static void SendByteArray(Socket socket, long initAddr, byte[] buffer, int size, ref int counter)
         {
@@ -1579,7 +1466,7 @@ namespace ACNHPokerCore
 
         #endregion
 
-        public static void SetMaxSpeed(Socket socket, USBBot usb, string value)
+        public static void SetMaxSpeed(Socket socket, string value)
         {
             if (isEmulator)
             {
@@ -1587,10 +1474,10 @@ namespace ACNHPokerCore
                 return;
             }
 
-            PokeAddress(socket, usb, MaxSpeedAddress.ToString("X"), value);
+            PokeAddress(socket, MaxSpeedAddress.ToString("X"), value);
         }
 
-        public static void SetStamina(Socket socket, USBBot usb, string value)
+        public static void SetStamina(Socket socket, string value)
         {
             if (isEmulator)
             {
@@ -1598,10 +1485,10 @@ namespace ACNHPokerCore
                 return;
             }
 
-            PokeAddress(socket, usb, staminaAddress.ToString("X"), value);
+            PokeAddress(socket, staminaAddress.ToString("X"), value);
         }
 
-        public static void SetAirportColor(Socket socket, USBBot usb, string value)
+        public static void SetAirportColor(Socket socket, string value)
         {
             if (isEmulator)
             {
@@ -1610,11 +1497,11 @@ namespace ACNHPokerCore
                 return;
             }
 
-            PokeAddress(socket, usb, AirportColor.ToString("X"), value);
-            PokeAddress(socket, usb, (AirportColor + SaveFileBuffer).ToString("X"), value);
+            PokeAddress(socket, AirportColor.ToString("X"), value);
+            PokeAddress(socket, (AirportColor + SaveFileBuffer).ToString("X"), value);
         }
 
-        public static void SetFlag1(Socket socket, USBBot usb, int slot, string flag)
+        public static void SetFlag1(Socket socket, int slot, string flag)
         {
             if (isEmulator)
             {
@@ -1622,10 +1509,10 @@ namespace ACNHPokerCore
                 return;
             }
 
-            PokeAddress(socket, usb, GetItemFlag1Address(slot), flag);
+            PokeAddress(socket, GetItemFlag1Address(slot), flag);
         }
 
-        public static byte[] GetTownID(Socket socket, USBBot usb)
+        public static byte[] GetTownID(Socket socket)
         {
             if (isEmulator)
             {
@@ -1634,8 +1521,7 @@ namespace ACNHPokerCore
 
             lock (botLock)
             {
-                if (usb == null)
-                {
+
                     Debug.Print("[Sys] Peek : TownID " + TownNameddress.ToString("X"));
 
                     byte[] b = ReadByteArray(socket, TownNameddress, 0x1C);
@@ -1645,23 +1531,11 @@ namespace ACNHPokerCore
                         MessageBox.Show("Wait something is wrong here!? \n\n TownNameddress");
                     }
                     return b;
-                }
-                else
-                {
-                    Debug.Print("[Usb] Peek : TownID " + TownNameddress.ToString("X"));
 
-                    byte[] b = usb.ReadBytes(TownNameddress, 0x1C);
-
-                    if (b == null)
-                    {
-                        MessageBox.Show("Wait something is wrong here!? \n\n TownNameddress");
-                    }
-                    return b;
-                }
             }
         }
 
-        public static byte[] GetWeatherSeed(Socket socket, USBBot usb)
+        public static byte[] GetWeatherSeed(Socket socket)
         {
             if (isEmulator)
             {
@@ -1670,8 +1544,7 @@ namespace ACNHPokerCore
 
             lock (botLock)
             {
-                if (usb == null)
-                {
+
                     Debug.Print("[Sys] Peek : WeatherSeed " + weatherSeed.ToString("X"));
 
                     byte[] b = ReadByteArray(socket, weatherSeed, 0x4);
@@ -1681,23 +1554,11 @@ namespace ACNHPokerCore
                         MessageBox.Show("Wait something is wrong here!? \n\n WeatherSeed");
                     }
                     return b;
-                }
-                else
-                {
-                    Debug.Print("[Usb] Peek : WeatherSeed " + weatherSeed.ToString("X"));
 
-                    byte[] b = usb.ReadBytes(weatherSeed, 0x4);
-
-                    if (b == null)
-                    {
-                        MessageBox.Show("Wait something is wrong here!? \n\n WeatherSeed");
-                    }
-                    return b;
-                }
             }
         }
 
-        public static byte GetAirportColor(Socket socket, USBBot usb)
+        public static byte GetAirportColor(Socket socket)
         {
             if (isEmulator)
             {
@@ -1706,8 +1567,7 @@ namespace ACNHPokerCore
 
             lock (botLock)
             {
-                if (usb == null)
-                {
+
                     Debug.Print("[Sys] Peek : AirportColor " + AirportColor.ToString("X"));
 
                     byte[] b = ReadByteArray(socket, AirportColor, 1);
@@ -1719,25 +1579,11 @@ namespace ACNHPokerCore
                     }
 
                     return b[0];
-                }
-                else
-                {
-                    Debug.Print("[Usb] Peek : AirportColor " + AirportColor.ToString("X"));
 
-                    byte[] b = ReadLargeBytes(usb, (uint)AirportColor, 1);
-
-                    if (b == null)
-                    {
-                        MessageBox.Show("Wait something is wrong here!? \n\n AirportColor");
-                        return 0xDD;
-                    }
-
-                    return b[0];
-                }
             }
         }
 
-        public static byte[] GetReaction(Socket socket, USBBot usb, int player)
+        public static byte[] GetReaction(Socket socket, int player)
         {
             if (isEmulator)
             {
@@ -1748,8 +1594,7 @@ namespace ACNHPokerCore
             {
                 try
                 {
-                    if (usb == null)
-                    {
+
                         Debug.Print("[Sys] Peek : Reaction " + (playerReactionAddress + (player * playerOffset)).ToString("X"));
 
                         byte[] b = ReadByteArray(socket, (playerReactionAddress + (player * playerOffset)), 8);
@@ -1760,20 +1605,6 @@ namespace ACNHPokerCore
                         }
 
                         return b;
-                    }
-                    else
-                    {
-                        Debug.Print("[Usb] Peek : Reaction " + (playerReactionAddress + (player * playerOffset)).ToString("X"));
-
-                        byte[] b = usb.ReadBytes((uint)(playerReactionAddress + (player * playerOffset)), 8);
-
-                        if (b == null)
-                        {
-                            MessageBox.Show("Wait something is wrong here!? \n\n Reaction");
-                        }
-
-                        return b;
-                    }
 
                 }
                 catch
@@ -1784,7 +1615,7 @@ namespace ACNHPokerCore
             }
         }
 
-        public static void SetReaction(Socket socket, USBBot usb, int player, string reactionFirstHalf, string reactionSecondHalf)
+        public static void SetReaction(Socket socket, int player, string reactionFirstHalf, string reactionSecondHalf)
         {
             byte[] b = Add(StringToByte(reactionFirstHalf), StringToByte(reactionSecondHalf));
 
@@ -1798,8 +1629,7 @@ namespace ACNHPokerCore
             {
                 try
                 {
-                    if (usb == null)
-                    {
+
                         SendByteArray(socket, playerReactionAddress + (player * playerOffset), b, b.Length);
                         /*
                         string msg = String.Format("poke 0x{0:X8} 0x{1}\r\n", (playerReactionAddress + (player * playerOffset)).ToString("x"), reactionFirstHalf);
@@ -1810,11 +1640,6 @@ namespace ACNHPokerCore
                         Debug.Print("Poke Reaction: " + msg);
                         SendString(socket, Encoding.UTF8.GetBytes(msg));
                         */
-                    }
-                    else
-                    {
-                        usb.WriteBytes(b, (uint)(playerReactionAddress + (player * playerOffset)));
-                    }
                 }
                 catch
                 {
@@ -1823,7 +1648,7 @@ namespace ACNHPokerCore
             }
         }
 
-        public static void SendSpawnRate(Socket socket, USBBot usb, byte[] buffer, int index, int type, ref int counter)
+        public static void SendSpawnRate(Socket socket, byte[] buffer, int index, int type, ref int counter)
         {
             if (isEmulator)
             {
@@ -1848,8 +1673,7 @@ namespace ACNHPokerCore
 
             lock (botLock)
             {
-                if (usb == null)
-                {
+
                     if (type == 0)
                     {
                         SendByteArray(socket, InsectAppearPointer + InsectDataSize * index + 0x2, buffer, 12 * 6 * 2, ref counter);
@@ -1866,30 +1690,10 @@ namespace ACNHPokerCore
                     {
                         SendByteArray(socket, CreatureSeaAppearPointer + SeaCreatureDataSize * index + 0x2, buffer, 78, ref counter);
                     }
-                }
-                else
-                {
-                    if (type == 0)
-                    {
-                        usb.WriteBytes(buffer, (uint)(InsectAppearPointer + InsectDataSize * index + 0x2));
-                    }
-                    else if (type == 1)
-                    {
-                        usb.WriteBytes(buffer, (uint)(FishRiverAppearPointer + FishDataSize * index + 0x2));
-                    }
-                    else if (type == 2)
-                    {
-                        usb.WriteBytes(buffer, (uint)(FishSeaAppearPointer + FishDataSize * index + 0x2));
-                    }
-                    else if (type == 3)
-                    {
-                        usb.WriteBytes(buffer, (uint)(CreatureSeaAppearPointer + SeaCreatureDataSize * index + 0x2));
-                    }
-                }
             }
         }
 
-        public static byte[] GetCritterData(Socket socket, USBBot usb, int mode)
+        public static byte[] GetCritterData(Socket socket, int mode)
         {
             if (isEmulator)
             {
@@ -1913,8 +1717,6 @@ namespace ACNHPokerCore
 
             lock (botLock)
             {
-                if (usb == null)
-                {
                     if (mode == 0)
                     {
                         Debug.Print("[Sys] Peek : Insect " + InsectAppearPointer.ToString("X") + " " + InsectDataSize * InsectNumRecords);
@@ -1936,35 +1738,11 @@ namespace ACNHPokerCore
                         return ReadByteArray(socket, CreatureSeaAppearPointer, SeaCreatureDataSize * SeaCreatureNumRecords);
                     }
                     return null;
-                }
-                else
-                {
-                    if (mode == 0)
-                    {
-                        Debug.Print("[Usb] Peek : Insect " + InsectAppearPointer.ToString("X") + " " + InsectDataSize * InsectNumRecords);
-                        return ReadLargeBytes(usb, InsectAppearPointer, InsectDataSize * InsectNumRecords);
-                    }
-                    else if (mode == 1)
-                    {
-                        Debug.Print("[Usb] Peek : FishRiver " + FishRiverAppearPointer.ToString("X") + " " + FishDataSize * FishRiverNumRecords);
-                        return ReadLargeBytes(usb, FishRiverAppearPointer, FishDataSize * FishRiverNumRecords);
-                    }
-                    else if (mode == 2)
-                    {
-                        Debug.Print("[Usb] Peek : FishSea " + FishSeaAppearPointer.ToString("X") + " " + FishDataSize * FishSeaNumRecords);
-                        return ReadLargeBytes(usb, FishSeaAppearPointer, FishDataSize * FishSeaNumRecords);
-                    }
-                    else if (mode == 3)
-                    {
-                        Debug.Print("[Usb] Peek : CreatureSea " + CreatureSeaAppearPointer.ToString("X") + " " + SeaCreatureDataSize * SeaCreatureNumRecords);
-                        return ReadLargeBytes(usb, CreatureSeaAppearPointer, SeaCreatureDataSize * SeaCreatureNumRecords);
-                    }
-                    return null;
-                }
+
             }
         }
 
-        public static byte[] GetVillager(Socket socket, USBBot usb, int num, int size, ref int counter)
+        public static byte[] GetVillager(Socket socket, int num, int size, ref int counter)
         {
             if (isEmulator)
             {
@@ -1973,8 +1751,6 @@ namespace ACNHPokerCore
 
             lock (botLock)
             {
-                if (usb == null)
-                {
                     Debug.Print("[Sys] Peek : Villager " + (VillagerAddress + (num * VillagerSize)).ToString("X") + " " + num + " " + size);
 
                     byte[] b = ReadByteArray(socket, VillagerAddress + (num * VillagerSize), size, ref counter);
@@ -1985,24 +1761,11 @@ namespace ACNHPokerCore
                     }
 
                     return b;
-                }
-                else
-                {
-                    Debug.Print("[Usb] Peek : Villager " + (VillagerAddress + (num * VillagerSize)).ToString("X") + " " + num + " " + size);
 
-                    byte[] b = ReadLargeBytes(usb, (uint)(VillagerAddress + (num * VillagerSize)), size, ref counter);
-
-                    if (b == null)
-                    {
-                        MessageBox.Show("Wait something is wrong here!? \n\n Villager");
-                    }
-
-                    return b;
-                }
             }
         }
 
-        public static byte[] GetVillager(Socket socket, USBBot usb, int num, int size)
+        public static byte[] GetVillager(Socket socket, int num, int size)
         {
             if (isEmulator)
             {
@@ -2011,8 +1774,6 @@ namespace ACNHPokerCore
 
             lock (botLock)
             {
-                if (usb == null)
-                {
                     byte[] b = ReadByteArray(socket, VillagerAddress + (num * VillagerSize), size);
 
                     if (b == null)
@@ -2021,22 +1782,11 @@ namespace ACNHPokerCore
                     }
 
                     return b;
-                }
-                else
-                {
-                    byte[] b = ReadLargeBytes(usb, (uint)(VillagerAddress + (num * VillagerSize)), size);
 
-                    if (b == null)
-                    {
-                        MessageBox.Show("Wait something is wrong here!? \n\n Villager");
-                    }
-
-                    return b;
-                }
             }
         }
 
-        public static void LoadVillager(Socket socket, USBBot usb, int num, byte[] villager, ref int counter)
+        public static void LoadVillager(Socket socket, int num, byte[] villager, ref int counter)
         {
             if (isEmulator)
             {
@@ -2046,22 +1796,15 @@ namespace ACNHPokerCore
 
             lock (botLock)
             {
-                if (usb == null)
-                {
+
                     SendByteArray(socket, VillagerAddress + (num * VillagerSize), villager, (int)VillagerSize, ref counter);
 
                     //SendByteArray(socket, VillagerAddress + (num * VillagerSize) + VillagerHouseBufferDiff, villager, (int)VillagerSize, ref counter);
-                }
-                else
-                {
-                    WriteLargeBytes(usb, VillagerAddress + (num * VillagerSize), villager, (int)VillagerSize, ref counter);
 
-                    //WriteLargeBytes(usb, VillagerAddress + (num * VillagerSize) + VillagerHouseBufferDiff, villager, (int)VillagerSize, ref counter);
-                }
             }
         }
 
-        public static byte[] GetMoveout(Socket socket, USBBot usb, int num, int size, ref int counter)
+        public static byte[] GetMoveout(Socket socket, int num, int size, ref int counter)
         {
             if (isEmulator)
             {
@@ -2070,8 +1813,6 @@ namespace ACNHPokerCore
 
             lock (botLock)
             {
-                if (usb == null)
-                {
                     //Debug.Print("[Sys] Peek : Moveout " + (VillagerAddress + (num * VillagerSize) + VillagerMoveoutOffset).ToString("X") + " " + size);
 
                     byte[] b = ReadByteArray(socket, VillagerAddress + (num * VillagerSize) + VillagerMoveoutOffset, size, ref counter);
@@ -2082,24 +1823,11 @@ namespace ACNHPokerCore
                     }
 
                     return b;
-                }
-                else
-                {
-                    Debug.Print("[Usb] Peek : Moveout " + (VillagerAddress + (num * VillagerSize) + VillagerMoveoutOffset).ToString("X") + " " + size);
 
-                    byte[] b = ReadLargeBytes(usb, (uint)(VillagerAddress + (num * VillagerSize) + VillagerMoveoutOffset), size, ref counter);
-
-                    if (b == null)
-                    {
-                        MessageBox.Show("Wait something is wrong here!? \n\n Moveout");
-                    }
-
-                    return b;
-                }
             }
         }
 
-        public static byte[] GetMoveout(Socket socket, USBBot usb, int num, int size)
+        public static byte[] GetMoveout(Socket socket, int num, int size)
         {
             if (isEmulator)
             {
@@ -2108,8 +1836,6 @@ namespace ACNHPokerCore
 
             lock (botLock)
             {
-                if (usb == null)
-                {
 
                     byte[] b = ReadByteArray(socket, VillagerAddress + (num * VillagerSize) + VillagerMoveoutOffset, size);
 
@@ -2119,23 +1845,11 @@ namespace ACNHPokerCore
                     }
 
                     return b;
-                }
-                else
-                {
 
-                    byte[] b = ReadLargeBytes(usb, (uint)(VillagerAddress + (num * VillagerSize) + VillagerMoveoutOffset), size);
-
-                    if (b == null)
-                    {
-                        MessageBox.Show("Wait something is wrong here!? \n\n Moveout");
-                    }
-
-                    return b;
-                }
             }
         }
 
-        public static void SetMoveout(Socket socket, USBBot usb, int num, byte[] flagData, ref int counter)
+        public static void SetMoveout(Socket socket, int num, byte[] flagData, ref int counter)
         {
             if (isEmulator)
             {
@@ -2145,18 +1859,13 @@ namespace ACNHPokerCore
 
             lock (botLock)
             {
-                if (usb == null)
-                {
+
                     SendByteArray(socket, VillagerAddress + (num * VillagerSize) + VillagerMoveoutOffset, flagData, flagData.Length, ref counter);
-                }
-                else
-                {
-                    WriteLargeBytes(usb, VillagerAddress + (num * VillagerSize) + VillagerMoveoutOffset, flagData, flagData.Length, ref counter);
-                }
+
             }
         }
 
-        public static byte[] GetHouse(Socket socket, USBBot usb, int num, ref int counter, uint diff = 0)
+        public static byte[] GetHouse(Socket socket, int num, ref int counter, uint diff = 0)
         {
             if (isEmulator)
             {
@@ -2165,8 +1874,6 @@ namespace ACNHPokerCore
 
             lock (botLock)
             {
-                if (usb == null)
-                {
                     Debug.Print("[Sys] Peek : House " + (VillagerHouseAddress + (num * (VillagerHouseSize)) + diff).ToString("X") + " " + (int)VillagerHouseSize);
 
                     byte[] b = ReadByteArray(socket, VillagerHouseAddress + (num * (VillagerHouseSize)) + diff, (int)VillagerHouseSize, ref counter);
@@ -2177,24 +1884,11 @@ namespace ACNHPokerCore
                     }
 
                     return b;
-                }
-                else
-                {
-                    Debug.Print("[Usb] Peek : House " + (VillagerHouseAddress + (num * (VillagerHouseSize)) + diff).ToString("X") + " " + (int)VillagerHouseSize);
 
-                    byte[] b = ReadLargeBytes(usb, (uint)(VillagerHouseAddress + (num * (VillagerHouseSize)) + diff), (int)VillagerHouseSize);
-
-                    if (b == null)
-                    {
-                        MessageBox.Show("Wait something is wrong here!? \n\n House");
-                    }
-
-                    return b;
-                }
             }
         }
 
-        public static void LoadHouse(Socket socket, USBBot usb, int num, byte[] house, ref int counter)
+        public static void LoadHouse(Socket socket, int num, byte[] house, ref int counter)
         {
             if (isEmulator)
             {
@@ -2205,22 +1899,13 @@ namespace ACNHPokerCore
 
             lock (botLock)
             {
-                if (usb == null)
-                {
                     SendByteArray(socket, VillagerHouseAddress + (num * (VillagerHouseSize)), house, (int)VillagerHouseSize, ref counter);
 
                     SendByteArray(socket, VillagerHouseAddress + (num * (VillagerHouseSize)) + VillagerHouseBufferDiff, house, (int)VillagerHouseSize, ref counter);
-                }
-                else
-                {
-                    WriteLargeBytes(usb, VillagerHouseAddress + (num * (VillagerHouseSize)), house, (int)VillagerHouseSize, ref counter);
-
-                    WriteLargeBytes(usb, VillagerHouseAddress + (num * (VillagerHouseSize)) + VillagerHouseBufferDiff, house, (int)VillagerHouseSize, ref counter);
-                }
             }
         }
 
-        public static byte GetHouseOwner(Socket socket, USBBot usb, int num, ref int counter)
+        public static byte GetHouseOwner(Socket socket, int num, ref int counter)
         {
             if (isEmulator)
             {
@@ -2229,8 +1914,6 @@ namespace ACNHPokerCore
 
             lock (botLock)
             {
-                if (usb == null)
-                {
                     Debug.Print("[Sys] Peek : HouseOwner " + (VillagerHouseAddress + (num * (VillagerHouseSize)) + VillagerHouseOwnerOffset).ToString("X"));
 
                     byte[] b = ReadByteArray(socket, VillagerHouseAddress + (num * (VillagerHouseSize)) + VillagerHouseOwnerOffset, 1, ref counter);
@@ -2242,25 +1925,11 @@ namespace ACNHPokerCore
                     }
 
                     return b[0];
-                }
-                else
-                {
-                    Debug.Print("[Usb] Peek : HouseOwner " + (VillagerHouseAddress + (num * (VillagerHouseSize)) + VillagerHouseOwnerOffset).ToString("X"));
 
-                    byte[] b = ReadLargeBytes(usb, (uint)(VillagerHouseAddress + (num * (VillagerHouseSize)) + VillagerHouseOwnerOffset), 1, ref counter);
-
-                    if (b == null)
-                    {
-                        MessageBox.Show("Wait something is wrong here!? \n\n HouseOwner");
-                        return 0xDD;
-                    }
-
-                    return b[0];
-                }
             }
         }
 
-        public static byte GetHouseOwner(Socket socket, USBBot usb, int num)
+        public static byte GetHouseOwner(Socket socket, int num)
         {
             if (isEmulator)
             {
@@ -2269,8 +1938,6 @@ namespace ACNHPokerCore
 
             lock (botLock)
             {
-                if (usb == null)
-                {
                     byte[] b = ReadByteArray(socket, VillagerHouseAddress + (num * (VillagerHouseSize)) + VillagerHouseOwnerOffset, 1);
 
                     if (b == null)
@@ -2280,23 +1947,11 @@ namespace ACNHPokerCore
                     }
 
                     return b[0];
-                }
-                else
-                {
-                    byte[] b = ReadLargeBytes(usb, (uint)(VillagerHouseAddress + (num * (VillagerHouseSize)) + VillagerHouseOwnerOffset), 1);
 
-                    if (b == null)
-                    {
-                        MessageBox.Show("Wait something is wrong here!? \n\n HouseOwner");
-                        return 0xDD;
-                    }
-
-                    return b[0];
-                }
             }
         }
 
-        public static byte[] GetCatchphrase(Socket socket, USBBot usb, int num, ref int counter)
+        public static byte[] GetCatchphrase(Socket socket, int num, ref int counter)
         {
             if (isEmulator)
             {
@@ -2305,8 +1960,6 @@ namespace ACNHPokerCore
 
             lock (botLock)
             {
-                if (usb == null)
-                {
                     Debug.Print("[Sys] Peek : Catchphrase " + (VillagerAddress + (num * VillagerSize) + VillagerCatchphraseOffset).ToString("X"));
 
                     byte[] b = ReadByteArray(socket, VillagerAddress + (num * VillagerSize) + VillagerCatchphraseOffset, 0x2C, ref counter);
@@ -2317,24 +1970,11 @@ namespace ACNHPokerCore
                     }
 
                     return b;
-                }
-                else
-                {
-                    Debug.Print("[Usb] Peek : Catchphrase " + (VillagerAddress + (num * VillagerSize) + VillagerCatchphraseOffset).ToString("X"));
 
-                    byte[] b = ReadLargeBytes(usb, (uint)(VillagerAddress + (num * VillagerSize) + VillagerCatchphraseOffset), 0x2C, ref counter);
-
-                    if (b == null)
-                    {
-                        MessageBox.Show("Wait something is wrong here!? \n\n Catchphrase");
-                    }
-
-                    return b;
-                }
             }
         }
 
-        public static void SetCatchphrase(Socket socket, USBBot usb, int num, byte[] pharse)
+        public static void SetCatchphrase(Socket socket, int num, byte[] pharse)
         {
             if (isEmulator)
             {
@@ -2346,8 +1986,6 @@ namespace ACNHPokerCore
             {
                 try
                 {
-                    if (usb == null)
-                    {
                         SendByteArray(socket, VillagerAddress + (num * VillagerSize) + VillagerCatchphraseOffset, pharse, pharse.Length);
                         /*
                         string msg;
@@ -2360,13 +1998,6 @@ namespace ACNHPokerCore
                         //Debug.Print("Poke Catchphrase: " + msg);
                         //SendString(socket, Encoding.UTF8.GetBytes(msg));
                         */
-                    }
-                    else
-                    {
-                        usb.WriteBytes(pharse, (uint)(VillagerAddress + (num * VillagerSize) + VillagerCatchphraseOffset));
-
-                        //usb.WriteBytes(pharse, (uint)(VillagerAddress + (num * VillagerSize) + VillagerCatchphraseOffset + VillagerHouseBufferDiff));
-                    }
                 }
                 catch
                 {
@@ -2375,12 +2006,10 @@ namespace ACNHPokerCore
             }
         }
 
-        public static byte GetVillagerFlag(Socket socket, USBBot usb, int num, uint offset)
+        public static byte GetVillagerFlag(Socket socket, int num, uint offset)
         {
             lock (botLock)
             {
-                if (usb == null)
-                {
                     Debug.Print("[Sys] Peek : VillagerFlag " + (VillagerAddress + (num * VillagerSize) + offset).ToString("X"));
 
                     byte[] b = ReadByteArray(socket, VillagerAddress + (num * VillagerSize) + offset, 1);
@@ -2391,24 +2020,11 @@ namespace ACNHPokerCore
                     }
 
                     return b[0];
-                }
-                else
-                {
-                    Debug.Print("[Usb] Peek : VillagerFlag " + (VillagerAddress + (num * VillagerSize) + offset).ToString("X"));
 
-                    byte[] b = ReadLargeBytes(usb, (uint)(VillagerAddress + (num * VillagerSize) + offset), 1);
-
-                    if (b == null)
-                    {
-                        MessageBox.Show(@"Wait something is wrong here!? VillagerFlag");
-                    }
-
-                    return b[0];
-                }
             }
         }
 
-        public static byte GetVillagerHouseFlag(Socket socket, USBBot usb, int num, uint offset, ref int counter)
+        public static byte GetVillagerHouseFlag(Socket socket, int num, uint offset, ref int counter)
         {
             if (isEmulator)
             {
@@ -2417,8 +2033,6 @@ namespace ACNHPokerCore
 
             lock (botLock)
             {
-                if (usb == null)
-                {
                     Debug.Print("[Sys] Peek : VillagerHouseFlag " + (VillagerHouseAddress + (num * (VillagerHouseSize)) + offset).ToString("X"));
 
                     byte[] b = ReadByteArray(socket, VillagerHouseAddress + (num * (VillagerHouseSize)) + offset, 1, ref counter);
@@ -2429,20 +2043,6 @@ namespace ACNHPokerCore
                     }
 
                     return b[0];
-                }
-                else
-                {
-                    Debug.Print("[Usb] Peek : VillagerHouseFlag " + (VillagerHouseAddress + (num * (VillagerHouseSize)) + offset).ToString("X"));
-
-                    byte[] b = ReadLargeBytes(usb, (uint)(VillagerHouseAddress + (num * (VillagerHouseSize)) + offset), 1, ref counter);
-
-                    if (b == null)
-                    {
-                        MessageBox.Show(@"Wait something is wrong here!? VillagerHouseFlag");
-                    }
-
-                    return b[0];
-                }
             }
         }
 
@@ -2456,7 +2056,8 @@ namespace ACNHPokerCore
             return -1;
         }
 
-        public static void SetMoveout(Socket socket, USBBot usb, int num, string MoveoutFlag = "2", string ForceMoveoutFlag = "1")
+
+        public static void SetMoveout2(Socket socket, int num, string MoveoutFlag = "2", string ForceMoveoutFlag = "1")
         {
             if (isEmulator)
             {
@@ -2473,8 +2074,6 @@ namespace ACNHPokerCore
             {
                 try
                 {
-                    if (usb == null)
-                    {
                         SendByteArray(socket, VillagerAddress + (num * VillagerSize) + VillagerMoveoutOffset, StringToByte(MoveoutFlag), 1);
                         SendByteArray(socket, VillagerAddress + (num * VillagerSize) + VillagerForceMoveoutOffset, StringToByte(ForceMoveoutFlag), 1);
                         SendByteArray(socket, VillagerAddress + (num * VillagerSize) + VillagerAbandonHouseOffset, StringToByte("0"), 1);
@@ -2505,21 +2104,6 @@ namespace ACNHPokerCore
                         //Debug.Print("Poke AbandonHouse: " + msg);
                         //SendString(socket, Encoding.UTF8.GetBytes(msg));
                         */
-                    }
-                    else
-                    {
-                        usb.WriteBytes(StringToByte(MoveoutFlag), (uint)(VillagerAddress + (num * VillagerSize) + VillagerMoveoutOffset));
-
-                        //usb.WriteBytes(stringToByte(MoveoutFlag), (uint)(VillagerAddress + (num * VillagerSize) + VillagerMoveoutOffset + VillagerHouseBufferDiff));
-
-                        usb.WriteBytes(StringToByte(ForceMoveoutFlag), (uint)(VillagerAddress + (num * VillagerSize) + VillagerForceMoveoutOffset));
-
-                        //usb.WriteBytes(stringToByte(ForceMoveoutFlag), (uint)(VillagerAddress + (num * VillagerSize) + VillagerForceMoveoutOffset + VillagerHouseBufferDiff));
-
-                        usb.WriteBytes(StringToByte("0"), (uint)(VillagerAddress + (num * VillagerSize) + VillagerAbandonHouseOffset));
-
-                        //usb.WriteBytes(stringToByte("0"), (uint)(VillagerAddress + (num * VillagerSize) + VillagerAbandonHouseOffset + VillagerHouseBufferDiff));
-                    }
                 }
                 catch
                 {
@@ -2528,7 +2112,7 @@ namespace ACNHPokerCore
             }
         }
 
-        public static void SetFriendship(Socket socket, USBBot usb, int num, int player, string FriendshipFlag = "FF")
+        public static void SetFriendship(Socket socket, int num, int player, string FriendshipFlag = "FF")
         {
             if (isEmulator)
             {
@@ -2541,8 +2125,6 @@ namespace ACNHPokerCore
             {
                 try
                 {
-                    if (usb == null)
-                    {
                         SendByteArray(socket, VillagerAddress + (num * VillagerSize) + (player * VillagerPlayerOffset) + VillagerFriendshipOffset, StringToByte(FriendshipFlag), 1);
                         /*
                         string msg;
@@ -2554,13 +2136,6 @@ namespace ACNHPokerCore
                         //Debug.Print("Poke Friendship: " + msg);
                         //SendString(socket, Encoding.UTF8.GetBytes(msg));
                         */
-                    }
-                    else
-                    {
-                        usb.WriteBytes(StringToByte(FriendshipFlag), (uint)(VillagerAddress + (num * VillagerSize) + (player * VillagerPlayerOffset) + VillagerFriendshipOffset));
-
-                        //usb.WriteBytes(stringToByte(FriendshipFlag), (uint)(VillagerAddress + (num * VillagerSize) + (player * VillagerPlayerOffset) + VillagerFriendshipOffset + VillagerHouseBufferDiff));
-                    }
                 }
                 catch
                 {
@@ -2569,7 +2144,7 @@ namespace ACNHPokerCore
             }
         }
 
-        public static byte[] GetPlayerDataVillager(Socket socket, USBBot usb, int num, int player, int size)
+        public static byte[] GetPlayerDataVillager(Socket socket, int num, int player, int size)
         {
             if (isEmulator)
             {
@@ -2578,8 +2153,6 @@ namespace ACNHPokerCore
 
             lock (botLock)
             {
-                if (usb == null)
-                {
                     Debug.Print("[Sys] Peek : Villager " + player + " " + (VillagerAddress + (num * VillagerSize) + (player * VillagerPlayerOffset)).ToString("X") + " " + num + " " + size);
 
                     byte[] b = ReadByteArray(socket, VillagerAddress + (num * VillagerSize) + (player * VillagerPlayerOffset), size);
@@ -2590,24 +2163,11 @@ namespace ACNHPokerCore
                     }
 
                     return b;
-                }
-                else
-                {
-                    Debug.Print("[Usb] Peek : Villager " + player + " " + (VillagerAddress + (num * VillagerSize) + (player * VillagerPlayerOffset)).ToString("X") + " " + num + " " + size);
 
-                    byte[] b = ReadLargeBytes(usb, (uint)(VillagerAddress + (num * VillagerSize) + (player * VillagerPlayerOffset)), size);
-
-                    if (b == null)
-                    {
-                        MessageBox.Show("Wait something is wrong here!? \n\n Villager");
-                    }
-
-                    return b;
-                }
             }
         }
 
-        public static void SetMysVillager(Socket socket, USBBot usb, byte[] buffer, byte[] species, ref int counter)
+        public static void SetMysVillager(Socket socket, byte[] buffer, byte[] species, ref int counter)
         {
             if (isEmulator)
             {
@@ -2618,20 +2178,12 @@ namespace ACNHPokerCore
 
             lock (botLock)
             {
-                if (usb == null)
-                {
                     SendByteArray(socket, MysIslandVillagerAddress, buffer, buffer.Length, ref counter);
                     SendByteArray(socket, MysIslandVillagerSpecies, species, species.Length, ref counter);
-                }
-                else
-                {
-                    usb.WriteBytes(buffer, MysIslandVillagerAddress);
-                    usb.WriteBytes(species, MysIslandVillagerSpecies);
-                }
             }
         }
 
-        public static byte[] GetMysVillagerName(Socket socket, USBBot usb)
+        public static byte[] GetMysVillagerName(Socket socket)
         {
             if (isEmulator)
             {
@@ -2640,8 +2192,6 @@ namespace ACNHPokerCore
 
             lock (botLock)
             {
-                if (usb == null)
-                {
                     Debug.Print("[Sys] Peek : MysVillager " + MysIslandVillagerAddress.ToString("X"));
 
                     byte[] b = ReadByteArray(socket, MysIslandVillagerAddress, 8);
@@ -2651,19 +2201,6 @@ namespace ACNHPokerCore
                         MessageBox.Show("Wait something is wrong here!? \n\n MysVillagerName");
                     }
                     return b;
-                }
-                else
-                {
-                    Debug.Print("[Usb] Peek : MysVillager " + MysIslandVillagerAddress.ToString("X"));
-
-                    byte[] b = usb.ReadBytes(MysIslandVillagerAddress, 8);
-
-                    if (b == null)
-                    {
-                        MessageBox.Show("Wait something is wrong here!? \n\n MysVillagerName");
-                    }
-                    return b;
-                }
             }
         }
 
@@ -2705,7 +2242,7 @@ namespace ACNHPokerCore
             }
         }
 
-        public static void DropItem(Socket socket, USBBot usb, long address, string itemId, string count, string flag0, string flag1)
+        public static void DropItem(Socket socket, long address, string itemId, string count, string flag0, string flag1)
         {
             if (isEmulator)
             {
@@ -2721,8 +2258,6 @@ namespace ACNHPokerCore
             {
                 try
                 {
-                    if (usb == null)
-                    {
                         SendByteArray(socket, address, StringToByte(BuildDropStringLeft(itemId, count, flag0, flag1)), 16);
                         SendByteArray(socket, address + SaveFileBuffer, StringToByte(BuildDropStringLeft(itemId, count, flag0, flag1)), 16);
 
@@ -2730,11 +2265,7 @@ namespace ACNHPokerCore
                         SendByteArray(socket, address + 0x600 + SaveFileBuffer, StringToByte(BuildDropStringRight(itemId)), 16);
 
                         Debug.Print("Drop: " + address + " " + itemId + " " + count + " " + flag0 + " " + flag1);
-                    }
-                    else
-                    {
 
-                    }
                 }
                 catch
                 {
@@ -2743,7 +2274,7 @@ namespace ACNHPokerCore
             }
         }
 
-        public static void DropCore(Socket socket, USBBot usb, long address, string itemId, string count, string flag0, string flag1)
+        public static void DropCore(Socket socket, long address, string itemId, string count, string flag0, string flag1)
         {
             if (isEmulator)
             {
@@ -2756,17 +2287,12 @@ namespace ACNHPokerCore
             {
                 try
                 {
-                    if (usb == null)
-                    {
+
                         SendByteArray(socket, address, StringToByte(BuildDropCore(itemId, count, flag0, flag1)), 8);
                         SendByteArray(socket, address + SaveFileBuffer, StringToByte(BuildDropCore(itemId, count, flag0, flag1)), 8);
 
                         Debug.Print("DropCore: " + address + " " + itemId + " " + count + " " + flag0 + " " + flag1);
-                    }
-                    else
-                    {
 
-                    }
                 }
                 catch
                 {
@@ -2775,14 +2301,13 @@ namespace ACNHPokerCore
             }
         }
 
-        public static void ExtDropItem(Socket socket, USBBot usb, long address, string itemId, string count, string flag0, string flag1)
+        public static void ExtDropItem(Socket socket, long address, string itemId, string count, string flag0, string flag1)
         {
             lock (botLock)
             {
                 try
                 {
-                    if (usb == null)
-                    {
+
                         SendByteArray(socket, address, StringToByte(ExtbuildDropStringLeft(itemId, count, flag0, flag1)), 16);
                         SendByteArray(socket, address + SaveFileBuffer, StringToByte(ExtbuildDropStringLeft(itemId, count, flag0, flag1)), 16);
 
@@ -2790,11 +2315,7 @@ namespace ACNHPokerCore
                         SendByteArray(socket, address + 0x600 + SaveFileBuffer, StringToByte(BuildDropStringRight("FFFE", true)), 16);
 
                         Debug.Print("Drop: " + address + " " + itemId + " " + count + " " + flag0 + " " + flag1);
-                    }
-                    else
-                    {
 
-                    }
                 }
                 catch
                 {
@@ -2808,7 +2329,7 @@ namespace ACNHPokerCore
             return Flip(itemId) + flag1 + flag0 + Flip(count) + Flip("FFFE") + "0000" + "0000" + "00" + "00";
         }
 
-        public static void DeleteFloorItem(Socket socket, USBBot usb, long address)
+        public static void DeleteFloorItem(Socket socket, long address)
         {
             if (isEmulator)
             {
@@ -2823,8 +2344,7 @@ namespace ACNHPokerCore
             {
                 try
                 {
-                    if (usb == null)
-                    {
+
                         SendByteArray(socket, address, StringToByte(BuildDropStringLeft("FFFE", "00000000", "00", "00", true)), 16);
                         SendByteArray(socket, address + SaveFileBuffer, StringToByte(BuildDropStringLeft("FFFE", "00000000", "00", "00", true)), 16);
 
@@ -2832,11 +2352,7 @@ namespace ACNHPokerCore
                         SendByteArray(socket, address + 0x600 + SaveFileBuffer, StringToByte(BuildDropStringRight("FFFE", true)), 16);
 
                         Debug.Print("Delete: " + address);
-                    }
-                    else
-                    {
 
-                    }
                 }
                 catch
                 {
@@ -2845,7 +2361,7 @@ namespace ACNHPokerCore
             }
         }
 
-        public static byte[] GetMapLayer(Socket socket, USBBot usb, long address, ref int counter)
+        public static byte[] GetMapLayer(Socket socket, long address, ref int counter)
         {
             if (isEmulator)
             {
@@ -2856,8 +2372,7 @@ namespace ACNHPokerCore
             {
                 try
                 {
-                    if (usb == null)
-                    {
+
                         Debug.Print("[Sys] Peek : Map Layer " + address.ToString("X"));
 
                         byte[] b = ReadByteArray(socket, address, (int)NewMapSize, ref counter);
@@ -2867,19 +2382,7 @@ namespace ACNHPokerCore
                             MessageBox.Show("Wait something is wrong here!? \n\n Map Layer");
                         }
                         return b;
-                    }
-                    else
-                    {
-                        Debug.Print("[Usb] Peek : Map Layer " + address.ToString("X"));
 
-                        byte[] b = ReadLargeBytes(usb, (uint)address, (int)NewMapSize, ref counter);
-
-                        if (b == null)
-                        {
-                            MessageBox.Show("Wait something is wrong here!? \n\n Map Layer");
-                        }
-                        return b;
-                    }
                 }
                 catch
                 {
@@ -2889,7 +2392,7 @@ namespace ACNHPokerCore
             }
         }
 
-        public static byte[] GetAcre(Socket socket, USBBot usb)
+        public static byte[] GetAcre(Socket socket)
         {
             if (isEmulator)
             {
@@ -2900,8 +2403,7 @@ namespace ACNHPokerCore
             {
                 try
                 {
-                    if (usb == null)
-                    {
+
                         Debug.Print("[Sys] Peek : Acre " + AcreOffset.ToString("X"));
 
                         byte[] b = ReadByteArray(socket, AcreOffset, AcreAndPlaza);
@@ -2911,19 +2413,7 @@ namespace ACNHPokerCore
                             MessageBox.Show("Wait something is wrong here!? \n\n Acre");
                         }
                         return b;
-                    }
-                    else
-                    {
-                        Debug.Print("[Usb] Peek : Acre " + AcreOffset.ToString("X"));
 
-                        byte[] b = usb.ReadBytes(AcreOffset, AcreAndPlaza);
-
-                        if (b == null)
-                        {
-                            MessageBox.Show("Wait something is wrong here!? \n\n Acre");
-                        }
-                        return b;
-                    }
                 }
                 catch
                 {
@@ -2933,7 +2423,7 @@ namespace ACNHPokerCore
             }
         }
 
-        public static void SendAcre(Socket socket, USBBot usb, byte[] acre, ref int counter)
+        public static void SendAcre(Socket socket, byte[] acre, ref int counter)
         {
             if (isEmulator)
             {
@@ -2946,20 +2436,12 @@ namespace ACNHPokerCore
             {
                 try
                 {
-                    if (usb == null)
-                    {
+
                         Debug.Print("[Sys] Poke : Acre " + AcreOffset.ToString("X"));
 
                         SendByteArray(socket, AcreOffset, acre, acre.Length, ref counter);
                         SendByteArray(socket, AcreOffset + SaveFileBuffer, acre, acre.Length, ref counter);
-                    }
-                    else
-                    {
-                        Debug.Print("[Usb] Poke : Acre " + AcreOffset.ToString("X"));
 
-                        WriteLargeBytes(usb, AcreOffset, acre, acre.Length, ref counter);
-                        WriteLargeBytes(usb, AcreOffset + SaveFileBuffer, acre, acre.Length, ref counter);
-                    }
                 }
                 catch
                 {
@@ -2968,7 +2450,7 @@ namespace ACNHPokerCore
             }
         }
 
-        public static void SendPlaza(Socket socket, USBBot usb, byte[] plaza, ref int counter)
+        public static void SendPlaza(Socket socket, byte[] plaza, ref int counter)
         {
             if (isEmulator)
             {
@@ -2981,20 +2463,12 @@ namespace ACNHPokerCore
             {
                 try
                 {
-                    if (usb == null)
-                    {
+
                         Debug.Print("[Sys] Poke : Plaza " + (AcreOffset + 0x94).ToString("X"));
 
                         SendByteArray(socket, AcreOffset + 0x94, plaza, plaza.Length, ref counter);
                         SendByteArray(socket, AcreOffset + 0x94 + SaveFileBuffer, plaza, plaza.Length, ref counter);
-                    }
-                    else
-                    {
-                        Debug.Print("[Usb] Poke : Plaza " + (AcreOffset + 0x94).ToString("X"));
 
-                        WriteLargeBytes(usb, AcreOffset + 0x94, plaza, plaza.Length, ref counter);
-                        WriteLargeBytes(usb, AcreOffset + 0x94 + SaveFileBuffer, plaza, plaza.Length, ref counter);
-                    }
                 }
                 catch
                 {
@@ -3003,7 +2477,7 @@ namespace ACNHPokerCore
             }
         }
 
-        public static void SendBuilding(Socket socket, USBBot usb, byte[] building, ref int counter)
+        public static void SendBuilding(Socket socket, byte[] building, ref int counter)
         {
             if (isEmulator)
             {
@@ -3016,20 +2490,11 @@ namespace ACNHPokerCore
             {
                 try
                 {
-                    if (usb == null)
-                    {
+
                         Debug.Print("[Sys] Poke : Building " + BuildingOffset.ToString("X"));
 
                         SendByteArray(socket, BuildingOffset, building, building.Length, ref counter);
                         SendByteArray(socket, BuildingOffset + SaveFileBuffer, building, building.Length, ref counter);
-                    }
-                    else
-                    {
-                        Debug.Print("[Usb] Poke : Building " + BuildingOffset.ToString("X"));
-
-                        WriteLargeBytes(usb, BuildingOffset, building, building.Length, ref counter);
-                        WriteLargeBytes(usb, BuildingOffset + SaveFileBuffer, building, building.Length, ref counter);
-                    }
                 }
                 catch
                 {
@@ -3038,7 +2503,7 @@ namespace ACNHPokerCore
             }
         }
 
-        public static byte[] GetBuilding(Socket socket, USBBot usb)
+        public static byte[] GetBuilding(Socket socket)
         {
             if (isEmulator)
             {
@@ -3049,8 +2514,7 @@ namespace ACNHPokerCore
             {
                 try
                 {
-                    if (usb == null)
-                    {
+
                         Debug.Print("[Sys] Peek : Building " + BuildingOffset.ToString("X"));
 
                         byte[] b = ReadByteArray(socket, BuildingOffset, AllBuildingSize);
@@ -3060,19 +2524,7 @@ namespace ACNHPokerCore
                             MessageBox.Show("Wait something is wrong here!? \n\n Building");
                         }
                         return b;
-                    }
-                    else
-                    {
-                        Debug.Print("[Usb] Peek : Building " + BuildingOffset.ToString("X"));
 
-                        byte[] b = usb.ReadBytes(BuildingOffset, AllBuildingSize);
-
-                        if (b == null)
-                        {
-                            MessageBox.Show("Wait something is wrong here!? \n\n Building");
-                        }
-                        return b;
-                    }
                 }
                 catch
                 {
@@ -3082,7 +2534,7 @@ namespace ACNHPokerCore
             }
         }
 
-        public static void SendTerrain(Socket socket, USBBot usb, byte[] terrain, ref int counter)
+        public static void SendTerrain(Socket socket, byte[] terrain, ref int counter)
         {
             if (isEmulator)
             {
@@ -3095,20 +2547,11 @@ namespace ACNHPokerCore
             {
                 try
                 {
-                    if (usb == null)
-                    {
                         Debug.Print("[Sys] Poke : Terrain " + TerrainOffset.ToString("X"));
 
                         SendByteArray(socket, TerrainOffset, terrain, AllTerrainSize, ref counter);
                         SendByteArray(socket, TerrainOffset + SaveFileBuffer, terrain, AllTerrainSize, ref counter);
-                    }
-                    else
-                    {
-                        Debug.Print("[Usb] Poke : Terrain " + TerrainOffset.ToString("X"));
 
-                        WriteLargeBytes(usb, TerrainOffset, terrain, AllTerrainSize, ref counter);
-                        WriteLargeBytes(usb, TerrainOffset + SaveFileBuffer, terrain, AllTerrainSize, ref counter);
-                    }
                 }
                 catch
                 {
@@ -3117,7 +2560,7 @@ namespace ACNHPokerCore
             }
         }
 
-        public static void SendCustomMap(Socket socket, USBBot usb, byte[] CustomMap, ref int counter)
+        public static void SendCustomMap(Socket socket, byte[] CustomMap, ref int counter)
         {
             if (isEmulator)
             {
@@ -3130,20 +2573,11 @@ namespace ACNHPokerCore
             {
                 try
                 {
-                    if (usb == null)
-                    {
                         Debug.Print("[Sys] Poke : CustomMap " + TerrainOffset.ToString("X"));
 
                         SendByteArray(socket, mapCustomDesign, CustomMap, CustomMap.Length, ref counter);
                         SendByteArray(socket, mapCustomDesign + SaveFileBuffer, CustomMap, CustomMap.Length, ref counter);
-                    }
-                    else
-                    {
-                        Debug.Print("[Usb] Poke : CustomMap " + TerrainOffset.ToString("X"));
 
-                        WriteLargeBytes(usb, mapCustomDesign, CustomMap, CustomMap.Length, ref counter);
-                        WriteLargeBytes(usb, mapCustomDesign + SaveFileBuffer, CustomMap, CustomMap.Length, ref counter);
-                    }
                 }
                 catch
                 {
@@ -3152,7 +2586,7 @@ namespace ACNHPokerCore
             }
         }
 
-        public static void SendOldCustomMap(Socket socket, USBBot usb, byte[] CustomMap, ref int counter)
+        public static void SendOldCustomMap(Socket socket, byte[] CustomMap, ref int counter)
         {
             if (isEmulator)
             {
@@ -3165,20 +2599,12 @@ namespace ACNHPokerCore
             {
                 try
                 {
-                    if (usb == null)
-                    {
+
                         Debug.Print("[Sys] Poke : OldCustomMap " + TerrainOffset.ToString("X"));
 
                         SendByteArray(socket, mapCustomDesign + (ExtendedMapOffset * CustomDesignByteSize), CustomMap, CustomMap.Length, ref counter);
                         SendByteArray(socket, mapCustomDesign + (ExtendedMapOffset * CustomDesignByteSize) + SaveFileBuffer, CustomMap, CustomMap.Length, ref counter);
-                    }
-                    else
-                    {
-                        Debug.Print("[Usb] Poke : OldCustomMap " + TerrainOffset.ToString("X"));
 
-                        WriteLargeBytes(usb, mapCustomDesign + (ExtendedMapOffset * CustomDesignByteSize), CustomMap, CustomMap.Length, ref counter);
-                        WriteLargeBytes(usb, mapCustomDesign + (ExtendedMapOffset * CustomDesignByteSize) + SaveFileBuffer, CustomMap, CustomMap.Length, ref counter);
-                    }
                 }
                 catch
                 {
@@ -3187,7 +2613,7 @@ namespace ACNHPokerCore
             }
         }
 
-        public static byte[] GetTerrain(Socket socket, USBBot usb)
+        public static byte[] GetTerrain(Socket socket)
         {
             if (isEmulator)
             {
@@ -3198,8 +2624,7 @@ namespace ACNHPokerCore
             {
                 try
                 {
-                    if (usb == null)
-                    {
+
                         Debug.Print("[Sys] Peek : Terrain " + TerrainOffset.ToString("X"));
 
                         byte[] b = ReadByteArray(socket, TerrainOffset, AllTerrainSize);
@@ -3209,19 +2634,7 @@ namespace ACNHPokerCore
                             MessageBox.Show("Wait something is wrong here!? \n\n Terrain");
                         }
                         return b;
-                    }
-                    else
-                    {
-                        Debug.Print("[Usb] Peek : Terrain " + TerrainOffset.ToString("X"));
 
-                        byte[] b = usb.ReadBytes(TerrainOffset, AllTerrainSize);
-
-                        if (b == null)
-                        {
-                            MessageBox.Show("Wait something is wrong here!? \n\n Terrain");
-                        }
-                        return b;
-                    }
                 }
                 catch
                 {
@@ -3231,7 +2644,7 @@ namespace ACNHPokerCore
             }
         }
 
-        public static byte[] GetActivate(Socket socket, USBBot usb, long address, ref int counter)
+        public static byte[] GetActivate(Socket socket, long address, ref int counter)
         {
             if (isEmulator)
             {
@@ -3242,8 +2655,7 @@ namespace ACNHPokerCore
             {
                 try
                 {
-                    if (usb == null)
-                    {
+
                         Debug.Print("[Sys] Peek : Activate " + address.ToString("X"));
 
                         byte[] b = ReadByteArray(socket, address, (int)mapActivateSize, ref counter);
@@ -3253,19 +2665,7 @@ namespace ACNHPokerCore
                             MessageBox.Show("Wait something is wrong here!? \n\n Activate");
                         }
                         return b;
-                    }
-                    else
-                    {
-                        Debug.Print("[Usb] Peek : Activate " + address.ToString("X"));
 
-                        byte[] b = ReadLargeBytes(usb, (uint)address, (int)mapActivateSize, ref counter);
-
-                        if (b == null)
-                        {
-                            MessageBox.Show("Wait something is wrong here!? \n\n Activate");
-                        }
-                        return b;
-                    }
                 }
                 catch
                 {
@@ -3275,7 +2675,7 @@ namespace ACNHPokerCore
             }
         }
 
-        public static byte[] GetCustomDesignMap(Socket socket, USBBot usb, ref int counter)
+        public static byte[] GetCustomDesignMap(Socket socket, ref int counter)
         {
             if (isEmulator)
             {
@@ -3286,8 +2686,7 @@ namespace ACNHPokerCore
             {
                 try
                 {
-                    if (usb == null)
-                    {
+
                         Debug.Print("[Sys] Peek : CustomDesignMap " + mapCustomDesign.ToString("X"));
 
                         byte[] b = ReadByteArray(socket, mapCustomDesign, ExtendedMapTileCount16x16 * 2, ref counter);
@@ -3297,19 +2696,7 @@ namespace ACNHPokerCore
                             MessageBox.Show("Wait something is wrong here!? \n\n CustomDesignMap");
                         }
                         return b;
-                    }
-                    else
-                    {
-                        Debug.Print("[Usb] Peek : CustomDesignMap " + mapCustomDesign.ToString("X"));
 
-                        byte[] b = ReadLargeBytes(usb, mapCustomDesign, ExtendedMapTileCount16x16 * 2, ref counter);
-
-                        if (b == null)
-                        {
-                            MessageBox.Show("Wait something is wrong here!? \n\n CustomDesignMap");
-                        }
-                        return b;
-                    }
                 }
                 catch
                 {
@@ -3319,7 +2706,7 @@ namespace ACNHPokerCore
             }
         }
 
-        public static byte[] GetMyDesign(Socket socket, USBBot usb, ref int counter)
+        public static byte[] GetMyDesign(Socket socket, ref int counter)
         {
             if (isEmulator)
             {
@@ -3330,8 +2717,7 @@ namespace ACNHPokerCore
             {
                 try
                 {
-                    if (usb == null)
-                    {
+
                         Debug.Print("[Sys] Peek : MyDesign " + MyDesignZero.ToString("X"));
 
                         byte[] b = ReadByteArray(socket, MyDesignZero, DesignPattern.SIZE * PatternCount, ref counter);
@@ -3341,19 +2727,7 @@ namespace ACNHPokerCore
                             MessageBox.Show("Wait something is wrong here!? \n\n MyDesign");
                         }
                         return b;
-                    }
-                    else
-                    {
-                        Debug.Print("[Usb] Peek : MyDesign " + MyDesignZero.ToString("X"));
 
-                        byte[] b = ReadLargeBytes(usb, MyDesignZero, DesignPattern.SIZE * PatternCount, ref counter);
-
-                        if (b == null)
-                        {
-                            MessageBox.Show("Wait something is wrong here!? \n\n MyDesign");
-                        }
-                        return b;
-                    }
                 }
                 catch
                 {
@@ -3364,7 +2738,7 @@ namespace ACNHPokerCore
         }
 
 
-        public static byte[] GetCoordinate(Socket socket, USBBot usb)
+        public static byte[] GetCoordinate(Socket socket)
         {
             if (isEmulator)
             {
@@ -3373,8 +2747,7 @@ namespace ACNHPokerCore
 
             lock (botLock)
             {
-                if (usb == null)
-                {
+
                     Debug.Print("[Sys] Peek : Coordinate " + coordinate.ToString("X"));
 
                     byte[] b = ReadByteArray(socket, coordinate, 8);
@@ -3384,23 +2757,11 @@ namespace ACNHPokerCore
                         MessageBox.Show("Wait something is wrong here!? \n\n Coordinate");
                     }
                     return b;
-                }
-                else
-                {
-                    Debug.Print("[Usb] Peek : Coordinate " + coordinate.ToString("X"));
 
-                    byte[] b = usb.ReadBytes(coordinate, 8);
-
-                    if (b == null)
-                    {
-                        MessageBox.Show("Wait something is wrong here!? \n\n Coordinate");
-                    }
-                    return b;
-                }
             }
         }
 
-        public static byte[] GetSaving(Socket socket, USBBot usb = null)
+        public static byte[] GetSaving(Socket socket)
         {
             if (isEmulator)
             {
@@ -3409,8 +2770,7 @@ namespace ACNHPokerCore
 
             lock (botLock)
             {
-                if (usb == null)
-                {
+
                     Debug.Print("[Sys] Peek : Save " + savingOffset.ToString("X"));
 
                     byte[] b = ReadByteArray(socket, savingOffset, 32);
@@ -3420,23 +2780,11 @@ namespace ACNHPokerCore
                         MessageBox.Show("Wait something is wrong here!? \n\n Save");
                     }
                     return b;
-                }
-                else
-                {
-                    Debug.Print("[Usb] Peek : Save " + savingOffset.ToString("X"));
 
-                    byte[] b = usb.ReadBytes(savingOffset, 32);
-
-                    if (b == null)
-                    {
-                        MessageBox.Show("Wait something is wrong here!? \n\n Save");
-                    }
-                    return b;
-                }
             }
         }
 
-        public static void DropColumn(Socket socket, USBBot usb, uint address1, uint address2, byte[] buffer1, byte[] buffer2, ref int counter)
+        public static void DropColumn(Socket socket, uint address1, uint address2, byte[] buffer1, byte[] buffer2, ref int counter)
         {
             if (isEmulator)
             {
@@ -3449,24 +2797,16 @@ namespace ACNHPokerCore
 
             lock (botLock)
             {
-                if (usb == null)
-                {
+
                     SendByteArray(socket, address1, buffer1, buffer1.Length, ref counter);
                     SendByteArray(socket, address1 + SaveFileBuffer, buffer1, buffer1.Length, ref counter);
                     SendByteArray(socket, address2, buffer2, buffer2.Length, ref counter);
                     SendByteArray(socket, address2 + SaveFileBuffer, buffer2, buffer2.Length, ref counter);
-                }
-                else
-                {
-                    WriteLargeBytes(usb, address1, buffer1, buffer1.Length, ref counter);
-                    WriteLargeBytes(usb, address1 + SaveFileBuffer, buffer1, buffer1.Length, ref counter);
-                    WriteLargeBytes(usb, address2, buffer2, buffer2.Length, ref counter);
-                    WriteLargeBytes(usb, address2 + SaveFileBuffer, buffer2, buffer2.Length, ref counter);
-                }
+
             }
         }
 
-        public static void DropColumn(Socket socket, USBBot usb, uint address1, uint address2, byte[] buffer1, byte[] buffer2)
+        public static void DropColumn(Socket socket, uint address1, uint address2, byte[] buffer1, byte[] buffer2)
         {
             if (isEmulator)
             {
@@ -3479,17 +2819,15 @@ namespace ACNHPokerCore
 
             lock (botLock)
             {
-                if (usb == null)
-                {
                     SendByteArray(socket, address1, buffer1, buffer1.Length);
                     SendByteArray(socket, address1 + SaveFileBuffer, buffer1, buffer1.Length);
                     SendByteArray(socket, address2, buffer2, buffer2.Length);
                     SendByteArray(socket, address2 + SaveFileBuffer, buffer2, buffer2.Length);
-                }
+               
             }
         }
 
-        public static void DropRenewColumn(Socket socket, USBBot usb, uint address, byte[] column, ref int counter)
+        public static void DropRenewColumn(Socket socket, uint address, byte[] column, ref int counter)
         {
             if (isEmulator)
             {
@@ -3500,19 +2838,13 @@ namespace ACNHPokerCore
 
             lock (botLock)
             {
-                if (usb == null)
-                {
                     SendByteArray(socket, address, column, column.Length, ref counter);
                     SendByteArray(socket, address + SaveFileBuffer, column, column.Length, ref counter);
-                }
-                else
-                {
 
-                }
             }
         }
 
-        public static byte[] Read7x7Floor(Socket socket, USBBot usb, uint address)
+        public static byte[] Read7x7Floor(Socket socket, uint address)
         {
             if (isEmulator)
             {
@@ -3523,14 +2855,8 @@ namespace ACNHPokerCore
             {
                 byte[] buffer = null;
 
-                if (usb == null)
-                {
                     buffer = ReadByteArray(socket, address, 0x4E70);
-                }
-                else
-                {
 
-                }
                 return buffer;
             }
         }
@@ -3599,14 +2925,12 @@ namespace ACNHPokerCore
             }
         }
 
-        public static string GetDodo(Socket socket, bool chi = false, USBBot usb = null)
+        public static string GetDodo(Socket socket, bool chi = false)
         {
             lock (botLock)
             {
                 byte[] b;
 
-                if (usb == null)
-                {
                     Debug.Print("[Sys] Peek : Dodo " + dodoAddress.ToString("X"));
                     if (chi)
                         b = ReadByteArray(socket, dodoAddress + ChineseLanguageOffset, 5);
@@ -3618,19 +2942,7 @@ namespace ACNHPokerCore
                         MessageBox.Show("Wait something is wrong here!? \n\n Dodo");
                         return "";
                     }
-                }
-                else
-                {
-                    Debug.Print("[Usb] Peek : Dodo " + dodoAddress.ToString("X"));
 
-                    b = usb.ReadBytes(dodoAddress, 5);
-
-                    if (b == null)
-                    {
-                        MessageBox.Show("Wait something is wrong here!? \n\n Dodo");
-                        return "";
-                    }
-                }
 
                 return Encoding.ASCII.GetString(b);
             }
@@ -3646,15 +2958,12 @@ namespace ACNHPokerCore
             }
         }
 
-        public static void SetTextSpeed(Socket socket, USBBot usb, bool chi)
+        public static void SetTextSpeed(Socket socket, bool chi)
         {
             lock (botLock)
             {
                 try
                 {
-                    if (usb == null)
-                    {
-
                         if (chi)
                         {
                             SendByteArray(socket, TextSpeedAddress + ChineseLanguageOffset, StringToByte("3"), 1);
@@ -3673,18 +2982,7 @@ namespace ACNHPokerCore
                             SendString(socket, Encoding.UTF8.GetBytes(msg));
                             */
                         }
-                    }
-                    else
-                    {
-                        if (chi)
-                        {
-                            usb.WriteBytes(StringToByte("3"), TextSpeedAddress);
-                        }
-                        else
-                        {
-                            usb.WriteBytes(StringToByte("3"), TextSpeedAddress + ChineseLanguageOffset);
-                        }
-                    }
+
                 }
                 catch
                 {
@@ -3693,7 +2991,7 @@ namespace ACNHPokerCore
             }
         }
 
-        public static void SetFastSwimSpeed(Socket socket, USBBot usb, bool enable)
+        public static void SetFastSwimSpeed(Socket socket, bool enable)
         {
             if (isEmulator)
             {
@@ -3719,17 +3017,17 @@ namespace ACNHPokerCore
             {
                 if (enable)
                 {
-                    PokeAddress(socket, usb, JumpDistance.ToString("X"), LongJumpDistance);
-                    PokeAddress(socket, usb, DiveTime.ToString("X"), LongDiveTime);
-                    PokeAddress(socket, usb, SwimSpeed.ToString("X"), FastSwimSpeed);
-                    PokeAddress(socket, usb, DiveSpeed.ToString("X"), FastDiveSpeed);
+                    PokeAddress(socket, JumpDistance.ToString("X"), LongJumpDistance);
+                    PokeAddress(socket, DiveTime.ToString("X"), LongDiveTime);
+                    PokeAddress(socket, SwimSpeed.ToString("X"), FastSwimSpeed);
+                    PokeAddress(socket, DiveSpeed.ToString("X"), FastDiveSpeed);
                 }
                 else
                 {
-                    PokeAddress(socket, usb, JumpDistance.ToString("X"), DefaultJumpDistance);
-                    PokeAddress(socket, usb, DiveTime.ToString("X"), DefaultDiveTime);
-                    PokeAddress(socket, usb, SwimSpeed.ToString("X"), DefaultSwimSpeed);
-                    PokeAddress(socket, usb, DiveSpeed.ToString("X"), DefaultDiveSpeed);
+                    PokeAddress(socket, JumpDistance.ToString("X"), DefaultJumpDistance);
+                    PokeAddress(socket, DiveTime.ToString("X"), DefaultDiveTime);
+                    PokeAddress(socket, SwimSpeed.ToString("X"), DefaultSwimSpeed);
+                    PokeAddress(socket, DiveSpeed.ToString("X"), DefaultDiveSpeed);
                 }
             }
         }
@@ -3915,12 +3213,10 @@ namespace ACNHPokerCore
             }
         }
 
-        public static string CheckSysBotBase(Socket socket, USBBot usb)
+        public static string CheckSysBotBase(Socket socket)
         {
             lock (botLock)
             {
-                if (usb == null)
-                {
                     byte[] b = new byte[20];
 
                     Debug.Print("[Sys] Sys-BotBase Version");
@@ -3929,13 +3225,7 @@ namespace ACNHPokerCore
                     ReceiveString(socket, b);
 
                     return TrimFromZero(Encoding.UTF8.GetString(b).Replace("\n", String.Empty));
-                }
-                else
-                {
-                    byte[] b = usb.GetVersion();
-                    Debug.Print("[USB] USB-BotBase Version");
-                    return TrimFromZero(Encoding.UTF8.GetString(b).Replace("\n", String.Empty));
-                }
+
             }
         }
 
@@ -3997,14 +3287,12 @@ namespace ACNHPokerCore
             catch (SocketException) { return false; }
         }
 
-        public static string GetVisitorNameFromList(Socket socket, USBBot usb, int i)
+        public static string GetVisitorNameFromList(Socket socket, int i)
         {
             lock (botLock)
             {
                 byte[] b;
 
-                if (usb == null)
-                {
 
                     b = ReadByteArray(socket, VisitorList + i * VisitorListSize, 20);
 
@@ -4013,17 +3301,6 @@ namespace ACNHPokerCore
                         MessageBox.Show("Wait something is wrong here!? \n\n GetVisitorNameFromList");
                         return "";
                     }
-                }
-                else
-                {
-                    b = usb.ReadBytes((uint)(VisitorList + i * VisitorListSize), 20);
-
-                    if (b == null)
-                    {
-                        MessageBox.Show("Wait something is wrong here!? \n\n GetVisitorNameFromList");
-                        return "";
-                    }
-                }
                 //Debug.Print("Byte : " + i + " " + ByteToHexString(b));
                 string tempName = Encoding.Unicode.GetString(b, 0, 20);
                 return tempName.Replace("\0", string.Empty);
@@ -4031,19 +3308,12 @@ namespace ACNHPokerCore
         }
 
 
-        public static bool HasItemInFirstSlot(Socket socket, USBBot usb = null)
+        public static bool HasItemInFirstSlot(Socket socket)
         {
             lock (botLock)
             {
                 byte[] b;
-                if (usb == null)
-                {
                     b = ReadByteArray(socket, ItemSlotBase, 4);
-                }
-                else
-                {
-                    b = usb.ReadBytes(ItemSlotBase, 4);
-                }
 
                 if (ByteToHexString(b).Equals("FEFF0000"))
                     return false;
@@ -4052,7 +3322,7 @@ namespace ACNHPokerCore
             }
         }
 
-        public static List<string> GetVillagerList(Socket socket, USBBot usb = null)
+        public static List<string> GetVillagerList(Socket socket)
         {
             lock (botLock)
             {
@@ -4061,7 +3331,7 @@ namespace ACNHPokerCore
 
                 for (int i = 0; i < 10; i++)
                 {
-                    b = GetVillager(socket, usb, i, 0x2);
+                    b = GetVillager(socket, i, 0x2);
                     string InternalName = GetVillagerInternalName(b[0], b[1]);
                     VillagerList.Add(InternalName);
                 }
@@ -4096,9 +3366,9 @@ namespace ACNHPokerCore
             });
         }
 
-        public static bool IsChinese(Socket socket, USBBot usb = null)
+        public static bool IsChinese(Socket socket)
         {
-            byte[] b = PeekAddress(socket, usb, readTimeAddress, 6);
+            byte[] b = PeekAddress(socket, readTimeAddress, 6);
             string time = ByteToHexString(b);
             ByteArrayToDateTime(b);
 
@@ -4110,7 +3380,7 @@ namespace ACNHPokerCore
 
             if (year > 3000 || month > 12 || day > 31 || hour > 24 || min > 60) // Try for Chineses
             {
-                b = PeekAddress(socket, usb, readTimeAddress + ChineseLanguageOffset, 6);
+                b = PeekAddress(socket, readTimeAddress + ChineseLanguageOffset, 6);
                 time = ByteToHexString(b);
 
                 year = Convert.ToInt32(Flip(time.Substring(0, 4)), 16);
@@ -4255,7 +3525,7 @@ namespace ACNHPokerCore
                 return "0000";
         }
 
-        public static bool IsAboutToSave(Socket socket, USBBot usb, int NeedSecond, int saveTime = 0, bool ignoreProtection = false)
+        public static bool IsAboutToSave(Socket socket, int NeedSecond, int saveTime = 0, bool ignoreProtection = false)
         {
             if (ignoreProtection)
                 return false;
@@ -4264,7 +3534,7 @@ namespace ACNHPokerCore
 
             try
             {
-                byte[] b = GetSaving(socket, usb);
+                byte[] b = GetSaving(socket);
 
                 if (b == null)
                     return true;

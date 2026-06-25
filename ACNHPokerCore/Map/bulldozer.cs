@@ -14,7 +14,6 @@ namespace ACNHPokerCore
     {
 
         private static Socket s;
-        private static USBBot usb;
         private readonly bool sound;
         private MiniMap MiniMap;
         private byte[] Layer1;
@@ -47,10 +46,9 @@ namespace ACNHPokerCore
         private readonly string debugBuilding = @"YourBuilding.nhb";
         private readonly string debugDesign = @"YourCustomDesignMap.nhdm";
 
-        public Bulldozer(Socket S, USBBot USB, bool Sound, bool Debugging)
+        public Bulldozer(Socket S, bool Sound, bool Debugging)
         {
             s = S;
-            usb = USB;
             sound = Sound;
             debugging = Debugging;
 
@@ -179,7 +177,7 @@ namespace ACNHPokerCore
 
         private void LoadMap(bool saveFile)
         {
-            if (s == null && usb == null && !Utilities.isEmulator)
+            if (s == null && !Utilities.isEmulator)
                 return;
 
             counter = 0;
@@ -187,10 +185,10 @@ namespace ACNHPokerCore
             //Layer1 = Utilities.getMapLayer(s, usb, layer1Address, ref counter);
             Layer1 = null;
             //Layer2 = Utilities.getMapLayer(s, bot, layer2Address, ref counter);
-            Acre = Utilities.GetAcre(s, usb);
-            Building = Utilities.GetBuilding(s, usb);
-            Terrain = Utilities.GetTerrain(s, usb);
-            MapCustomDesgin = Utilities.GetCustomDesignMap(s, usb, ref counter);
+            Acre = Utilities.GetAcre(s);
+            Building = Utilities.GetBuilding(s);
+            Terrain = Utilities.GetTerrain(s);
+            MapCustomDesgin = Utilities.GetCustomDesignMap(s, ref counter);
 
             if (saveFile)
             {
@@ -559,7 +557,7 @@ namespace ACNHPokerCore
             byte[] AcreOnly = new byte[0x90];
             Buffer.BlockCopy(Acre, 0x0, AcreOnly, 0x0, 0x90);
             int counter = 0;
-            Utilities.SendAcre(s, usb, AcreOnly, ref counter);
+            Utilities.SendAcre(s, AcreOnly, ref counter);
             sendBtn.BackColor = Color.FromArgb(114, 137, 218);
 
             if (sound)
@@ -1337,10 +1335,10 @@ namespace ACNHPokerCore
             {
                 byte[] PlazaOnly = new byte[0x8];
                 Buffer.BlockCopy(Acre, 0x94, PlazaOnly, 0x0, 0x8);
-                Utilities.SendPlaza(s, usb, PlazaOnly, ref counter);
+                Utilities.SendPlaza(s, PlazaOnly, ref counter);
             }
 
-            Utilities.SendBuilding(s, usb, Building, ref counter);
+            Utilities.SendBuilding(s, Building, ref counter);
             buildingConfirmBtn.BackColor = Color.FromArgb(114, 137, 218);
             miniMapBox.BackgroundImage = MiniMap.CombineMap(MiniMap.DrawFullBackground(), MiniMap.DrawEdge());
             miniMapBox.Image = null;
@@ -1839,7 +1837,7 @@ namespace ACNHPokerCore
 
         private void FlattenAllBtn_Click(object sender, EventArgs e)
         {
-            MyWarning flattenWarning = new(s, usb, sound, MiniMap);
+            MyWarning flattenWarning = new(s, sound, MiniMap);
             flattenWarning.ShowDialog();
             miniMapBox.BackgroundImage = MiniMap.CombineMap(MiniMap.DrawFullBackground(), MiniMap.DrawEdge());
             miniMapBox.Image = null;
@@ -1862,12 +1860,12 @@ namespace ACNHPokerCore
 
         private void RemoveRoad()
         {
-            byte[] CurrentTerrainData = Utilities.GetTerrain(s, usb);
+            byte[] CurrentTerrainData = Utilities.GetTerrain(s);
 
             int c = 0;
             int timeNeeded = 10;
 
-            while (Utilities.IsAboutToSave(s, usb, timeNeeded))
+            while (Utilities.IsAboutToSave(s, timeNeeded))
             {
                 if (c > timeNeeded + 5)
                     break;
@@ -1886,7 +1884,7 @@ namespace ACNHPokerCore
 
             MiniMap.UpdateTerrain(CurrentTerrainData);
 
-            Utilities.SendTerrain(s, usb, CurrentTerrainData, ref counter);
+            Utilities.SendTerrain(s, CurrentTerrainData, ref counter);
 
             if (sound)
                 System.Media.SystemSounds.Asterisk.Play();
@@ -1927,7 +1925,7 @@ namespace ACNHPokerCore
             int c = 0;
             int timeNeeded = 10;
 
-            while (Utilities.IsAboutToSave(s, usb, timeNeeded))
+            while (Utilities.IsAboutToSave(s, timeNeeded))
             {
                 if (c > timeNeeded + 5)
                     break;
@@ -1948,7 +1946,7 @@ namespace ACNHPokerCore
                 }
             }
 
-            Utilities.SendCustomMap(s, usb, newCustomMap, ref counter);
+            Utilities.SendCustomMap(s, newCustomMap, ref counter);
 
             if (sound)
                 System.Media.SystemSounds.Asterisk.Play();
@@ -2024,7 +2022,7 @@ namespace ACNHPokerCore
         {
             try
             {
-                byte[] terrain = Utilities.GetTerrain(s, usb);
+                byte[] terrain = Utilities.GetTerrain(s);
 
                 File.WriteAllBytes(file.FileName, terrain);
 
@@ -2115,7 +2113,7 @@ namespace ACNHPokerCore
                 int c = 0;
                 int timeNeeded = 10;
 
-                while (Utilities.IsAboutToSave(s, usb, timeNeeded))
+                while (Utilities.IsAboutToSave(s, timeNeeded))
                 {
                     if (c > timeNeeded + 5)
                         break;
@@ -2125,7 +2123,7 @@ namespace ACNHPokerCore
 
                 counter = 0;
 
-                Utilities.SendTerrain(s, usb, terrain, ref counter);
+                Utilities.SendTerrain(s, terrain, ref counter);
 
                 if (!formClosed)
                 {

@@ -36,7 +36,6 @@ namespace ACNHPokerCore
         private static bool DEBUGGING;
 
         private static Socket socket;
-        private static USBBot usb;
         private readonly string version = "ACNHPokerCore R25 for v3.0.2";
         private string hardwareId;
 
@@ -955,12 +954,12 @@ namespace ACNHPokerCore
         #region Island Name
         private string UpdateTownID()
         {
-            if (socket == null && usb == null && Utilities.isEmulator == false)
+            if (socket == null && Utilities.isEmulator == false)
                 return "";
 
             MyLog.LogEvent("MainForm", "Reading Island Name :");
 
-            byte[] townID = Utilities.GetTownID(socket, usb);
+            byte[] townID = Utilities.GetTownID(socket);
             IslandName = Utilities.GetString(townID, 0x04, 10);
 
             MyLog.LogEvent("MainForm", IslandName);
@@ -1284,7 +1283,7 @@ namespace ACNHPokerCore
                                 {
                                     MyLog.LogEvent("MainForm", "Checking sys-botbase version");
 
-                                    string sysbotbaseVersion = Utilities.CheckSysBotBase(socket, usb);
+                                    string sysbotbaseVersion = Utilities.CheckSysBotBase(socket);
 
                                     string gameVersion = version.Split("v")[1];
 
@@ -1393,8 +1392,8 @@ namespace ACNHPokerCore
                                 if (autorefill)
                                 {
 
-                                    byte[] bank01To20 = Utilities.GetInventoryBank(socket, null, 1);
-                                    byte[] bank21To40 = Utilities.GetInventoryBank(socket, null, 21);
+                                    byte[] bank01To20 = Utilities.GetInventoryBank(socket, 1);
+                                    byte[] bank21To40 = Utilities.GetInventoryBank(socket, 21);
 
                                     Utilities.SendString(socket, Utilities.Freeze(Utilities.ItemSlotBase, bank01To20));
                                     Utilities.SendString(socket, Utilities.Freeze(Utilities.ItemSlot21Base, bank21To40));
@@ -1426,10 +1425,10 @@ namespace ACNHPokerCore
                                 if (!Directory.Exists(@"Debug\"))
                                     Directory.CreateDirectory(@"Debug\");
 
-                                byte[] CollisionResult = Utilities.PeekMainAddress(socket, null, Utilities.CollisionAddress, 1000);
+                                byte[] CollisionResult = Utilities.PeekMainAddress(socket, Utilities.CollisionAddress, 1000);
                                 File.WriteAllBytes(@"Debug\Collision", CollisionResult);
 
-                                byte[] TimeResult = Utilities.PeekMainAddress(socket, null, Utilities.freezeTimeAddress, 1000);
+                                byte[] TimeResult = Utilities.PeekMainAddress(socket, Utilities.freezeTimeAddress, 1000);
                                 File.WriteAllBytes(@"Debug\Time", TimeResult);
 
                                 string AddressResult = "Collision : " + Utilities.CollisionAddress.ToString("X") + "\n" +
@@ -1529,11 +1528,11 @@ namespace ACNHPokerCore
             {
                 MyLog.LogEvent("MainForm", "Start Data Validation");
 
-                byte[] bank1 = Utilities.PeekAddress(socket, usb, Utilities.TownNameddress, 150); //TownNameddress
-                byte[] bank2 = Utilities.PeekAddress(socket, usb, Utilities.TurnipPurchasePriceAddr, 150); //TurnipPurchasePriceAddr
-                byte[] bank3 = Utilities.PeekAddress(socket, usb, Utilities.MasterRecyclingBase, 150); //MasterRecyclingBase
-                byte[] bank4 = Utilities.PeekAddress(socket, usb, Utilities.playerReactionAddress, 150); //reactionAddress
-                byte[] bank5 = Utilities.PeekAddress(socket, usb, Utilities.staminaAddress, 150); //staminaAddress
+                byte[] bank1 = Utilities.PeekAddress(socket, Utilities.TownNameddress, 150); //TownNameddress
+                byte[] bank2 = Utilities.PeekAddress(socket, Utilities.TurnipPurchasePriceAddr, 150); //TurnipPurchasePriceAddr
+                byte[] bank3 = Utilities.PeekAddress(socket, Utilities.MasterRecyclingBase, 150); //MasterRecyclingBase
+                byte[] bank4 = Utilities.PeekAddress(socket, Utilities.playerReactionAddress, 150); //reactionAddress
+                byte[] bank5 = Utilities.PeekAddress(socket, Utilities.staminaAddress, 150); //staminaAddress
 
                 string hexString1 = Utilities.ByteToHexString(bank1);
                 string hexString2 = Utilities.ByteToHexString(bank2);
@@ -1603,7 +1602,7 @@ namespace ACNHPokerCore
 
             for (int i = 0; i < 8; i++)
             {
-                byte[] b = Utilities.GetInventoryName(socket, usb, i);
+                byte[] b = Utilities.GetInventoryName(socket, i);
                 if (b == null)
                 {
                     namelist[i] = "NULL";
@@ -1662,8 +1661,8 @@ namespace ACNHPokerCore
             {
 
 
-                byte[] bank01To20 = Utilities.GetInventoryBank(socket, null, 1);
-                byte[] bank21To40 = Utilities.GetInventoryBank(socket, null, 21);
+                byte[] bank01To20 = Utilities.GetInventoryBank(socket, 1);
+                byte[] bank21To40 = Utilities.GetInventoryBank(socket, 21);
 
                 Utilities.SendString(socket, Utilities.Freeze(Utilities.ItemSlotBase, bank01To20));
                 Utilities.SendString(socket, Utilities.Freeze(Utilities.ItemSlot21Base, bank21To40));
@@ -1745,12 +1744,12 @@ namespace ACNHPokerCore
 
             try
             {
-                byte[] bank01To20 = Utilities.GetInventoryBank(socket, usb, 1);
+                byte[] bank01To20 = Utilities.GetInventoryBank(socket, 1);
                 if (bank01To20 == null)
                 {
                     return;
                 }
-                byte[] bank21To40 = Utilities.GetInventoryBank(socket, usb, 21);
+                byte[] bank21To40 = Utilities.GetInventoryBank(socket, 21);
                 if (bank21To40 == null)
                 {
                     return;
@@ -2154,7 +2153,7 @@ namespace ACNHPokerCore
             try
             {
                 if (!offline)
-                    Utilities.SpawnItem(socket, usb, selectedSlot, SelectedItem.GetFlag0() + SelectedItem.GetFlag1() + IDTextbox.Text, Utilities.PrecedingZeros(hexValue, 8));
+                    Utilities.SpawnItem(socket, selectedSlot, SelectedItem.GetFlag0() + SelectedItem.GetFlag1() + IDTextbox.Text, Utilities.PrecedingZeros(hexValue, 8));
 
                 if (IDTextbox.Text is "16A2") //recipe
                 {
@@ -2201,7 +2200,7 @@ namespace ACNHPokerCore
             }
 
             if (!offline)
-                Utilities.SpawnRecipe(socket, usb, selectedSlot, "16A2", Utilities.Turn2bytes(RecipeIDTextbox.Text));
+                Utilities.SpawnRecipe(socket, selectedSlot, "16A2", Utilities.Turn2bytes(RecipeIDTextbox.Text));
 
             //this.ShowMessage(Utilities.turn2bytes(RecipeIDTextbox.Text));
 
@@ -2223,7 +2222,7 @@ namespace ACNHPokerCore
             }
 
             if (!offline)
-                Utilities.SpawnFlower(socket, usb, selectedSlot, FlowerIDTextbox.Text, FlowerValueTextbox.Text);
+                Utilities.SpawnFlower(socket, selectedSlot, FlowerIDTextbox.Text, FlowerValueTextbox.Text);
 
             //this.ShowMessage(FlowerIDTextbox.Text);
 
@@ -2243,7 +2242,7 @@ namespace ACNHPokerCore
             {
                 try
                 {
-                    Utilities.DeleteSlot(socket, usb, int.Parse(selectedButton.Tag.ToString()));
+                    Utilities.DeleteSlot(socket, int.Parse(selectedButton.Tag.ToString()));
                 }
                 catch (Exception ex)
                 {
@@ -2367,7 +2366,7 @@ namespace ACNHPokerCore
                         int slotId = int.Parse(owner.SourceControl.Tag.ToString());
                         try
                         {
-                            Utilities.DeleteSlot(socket, usb, slotId);
+                            Utilities.DeleteSlot(socket, slotId);
                         }
                         catch (Exception ex)
                         {
@@ -2414,8 +2413,8 @@ namespace ACNHPokerCore
 
                     if (!offline)
                     {
-                        byte[] bank01To20 = Utilities.GetInventoryBank(socket, usb, 1);
-                        byte[] bank21To40 = Utilities.GetInventoryBank(socket, usb, 21);
+                        byte[] bank01To20 = Utilities.GetInventoryBank(socket, 1);
+                        byte[] bank21To40 = Utilities.GetInventoryBank(socket, 21);
 
                         int slot = int.Parse(owner.SourceControl.Tag.ToString());
                         byte[] slotBytes = new byte[2];
@@ -2446,7 +2445,7 @@ namespace ACNHPokerCore
                             return;
                         }
 
-                        Utilities.SetFlag1(socket, usb, slot, flag);
+                        Utilities.SetFlag1(socket, slot, flag);
 
                         var btnParent = (InventorySlot)owner.SourceControl;
                         btnParent.SetFlag0(flag);
@@ -2494,8 +2493,8 @@ namespace ACNHPokerCore
 
             if (!offline)
             {
-                byte[] bank01To20 = Utilities.GetInventoryBank(socket, usb, 1);
-                byte[] bank21To40 = Utilities.GetInventoryBank(socket, usb, 21);
+                byte[] bank01To20 = Utilities.GetInventoryBank(socket, 1);
+                byte[] bank21To40 = Utilities.GetInventoryBank(socket, 21);
 
                 foreach (InventorySlot btn in InventoryPanel.Controls.OfType<InventorySlot>())
                 {
@@ -2525,7 +2524,7 @@ namespace ACNHPokerCore
 
                     if (slotId != "FFFE")
                     {
-                        Utilities.SetFlag1(socket, usb, slot, flag);
+                        Utilities.SetFlag1(socket, slot, flag);
                         Invoke((MethodInvoker)delegate
                         {
                             btn.SetFlag0(flag);
@@ -2570,8 +2569,8 @@ namespace ACNHPokerCore
 
             if (!offline)
             {
-                byte[] bank01To20 = Utilities.GetInventoryBank(socket, usb, 1);
-                byte[] bank21To40 = Utilities.GetInventoryBank(socket, usb, 21);
+                byte[] bank01To20 = Utilities.GetInventoryBank(socket, 1);
+                byte[] bank21To40 = Utilities.GetInventoryBank(socket, 21);
 
                 foreach (InventorySlot btn in InventoryPanel.Controls.OfType<InventorySlot>())
                 {
@@ -2601,7 +2600,7 @@ namespace ACNHPokerCore
 
                     if (slotId != "FFFE")
                     {
-                        Utilities.SetFlag1(socket, usb, slot, "00");
+                        Utilities.SetFlag1(socket, slot, "00");
                         Invoke((MethodInvoker)delegate
                         {
                             btn.SetFlag0("00");
@@ -2982,8 +2981,8 @@ namespace ACNHPokerCore
 
                 if (!offline)
                 {
-                    byte[] bank01To20 = Utilities.GetInventoryBank(socket, usb, 1);
-                    byte[] bank21To40 = Utilities.GetInventoryBank(socket, usb, 21);
+                    byte[] bank01To20 = Utilities.GetInventoryBank(socket, 1);
+                    byte[] bank21To40 = Utilities.GetInventoryBank(socket, 21);
                     //bank = Utilities.ByteToHexString(bank01To20) + Utilities.ByteToHexString(bank21To40);
 
 
@@ -3096,8 +3095,8 @@ namespace ACNHPokerCore
 
             if (!offline)
             {
-                byte[] bank01To20 = Utilities.GetInventoryBank(socket, usb, 1);
-                byte[] bank21To40 = Utilities.GetInventoryBank(socket, usb, 21);
+                byte[] bank01To20 = Utilities.GetInventoryBank(socket, 1);
+                byte[] bank21To40 = Utilities.GetInventoryBank(socket, 21);
 
                 byte[] currentInventory = new byte[320];
 
@@ -3123,7 +3122,7 @@ namespace ACNHPokerCore
                             b2[i] = data[i + 160];
                         }
 
-                        Utilities.OverwriteAll(socket, usb, b1, b2, ref counter);
+                        Utilities.OverwriteAll(socket, b1, b2, ref counter);
                     }
                     else
                     {
@@ -3139,7 +3138,7 @@ namespace ACNHPokerCore
                     b2 = bank21To40;
                     FillInventory(ref b1, ref b2, item);
 
-                    Utilities.OverwriteAll(socket, usb, b1, b2, ref counter);
+                    Utilities.OverwriteAll(socket, b1, b2, ref counter);
                 }
             }
             else
@@ -3420,8 +3419,8 @@ namespace ACNHPokerCore
                 {
                     try
                     {
-                        byte[] bank01To20 = Utilities.GetInventoryBank(socket, usb, 1);
-                        byte[] bank21To40 = Utilities.GetInventoryBank(socket, usb, 21);
+                        byte[] bank01To20 = Utilities.GetInventoryBank(socket, 1);
+                        byte[] bank21To40 = Utilities.GetInventoryBank(socket, 21);
 
                         byte[] newItem = Utilities.Add(Utilities.StringToByte(Utilities.Flip(SelectedItem.GetFlag0() + SelectedItem.GetFlag1() + itemId)), Utilities.StringToByte(Utilities.Flip(Utilities.PrecedingZeros(itemAmount, 8))));
 
@@ -3478,7 +3477,7 @@ namespace ACNHPokerCore
                             }
                         }
 
-                        Utilities.OverwriteAll(socket, usb, bank01To20, bank21To40, ref counter);
+                        Utilities.OverwriteAll(socket, bank01To20, bank21To40, ref counter);
 
                         Thread.Sleep(1000);
                     }
@@ -3572,7 +3571,7 @@ namespace ACNHPokerCore
 
                 try
                 {
-                    Utilities.OverwriteAll(socket, usb, b, b, ref counter);
+                    Utilities.OverwriteAll(socket, b, b, ref counter);
                 }
                 catch (Exception ex)
                 {
@@ -3648,7 +3647,7 @@ namespace ACNHPokerCore
                         }
                     }
 
-                    Utilities.OverwriteAll(socket, usb, b, b, ref counter);
+                    Utilities.OverwriteAll(socket, b, b, ref counter);
                     //string result = Encoding.ASCII.GetString(Utilities.transform(b));
                     //Debug.Print(result);
 
@@ -4422,7 +4421,7 @@ namespace ACNHPokerCore
         #region Reaction
         private void LoadReaction(int player = 0)
         {
-            byte[] reactionBank = Utilities.GetReaction(socket, usb, player);
+            byte[] reactionBank = Utilities.GetReaction(socket, player);
             Debug.Print(Utilities.ByteToHexString(reactionBank));
 
             byte[] reactions1 = new byte[1];
@@ -4481,7 +4480,7 @@ namespace ACNHPokerCore
 
             string reactionFirstHalf = (Utilities.PrecedingZeros((ReactionSlot1.SelectedIndex + 1).ToString("X"), 2) + Utilities.PrecedingZeros((ReactionSlot2.SelectedIndex + 1).ToString("X"), 2) + Utilities.PrecedingZeros((ReactionSlot3.SelectedIndex + 1).ToString("X"), 2) + Utilities.PrecedingZeros((ReactionSlot4.SelectedIndex + 1).ToString("X"), 2));
             string reactionSecondHalf = (Utilities.PrecedingZeros((ReactionSlot5.SelectedIndex + 1).ToString("X"), 2) + Utilities.PrecedingZeros((ReactionSlot6.SelectedIndex + 1).ToString("X"), 2) + Utilities.PrecedingZeros((ReactionSlot7.SelectedIndex + 1).ToString("X"), 2) + Utilities.PrecedingZeros((ReactionSlot8.SelectedIndex + 1).ToString("X"), 2));
-            Utilities.SetReaction(socket, usb, player, reactionFirstHalf, reactionSecondHalf);
+            Utilities.SetReaction(socket, player, reactionFirstHalf, reactionSecondHalf);
             if (sound)
                 System.Media.SystemSounds.Asterisk.Play();
         }
@@ -4512,7 +4511,7 @@ namespace ACNHPokerCore
         {
             MyLog.LogEvent("MainForm", "Reading Weather Seed :");
 
-            byte[] b = Utilities.GetWeatherSeed(socket, usb);
+            byte[] b = Utilities.GetWeatherSeed(socket);
             string result = Utilities.ByteToHexString(b);
             UInt32 decValue = Convert.ToUInt32(Utilities.Flip(result), 16);
             UInt32 seed = decValue - 2147483648;
@@ -4525,7 +4524,7 @@ namespace ACNHPokerCore
         {
             MyLog.LogEvent("MainForm", "Airport Color :");
 
-            byte b = Utilities.GetAirportColor(socket, usb);
+            byte b = Utilities.GetAirportColor(socket);
             int colorValue = Convert.ToInt32(b);
             if (colorValue < 0 || colorValue > 3)
             {
@@ -4542,7 +4541,7 @@ namespace ACNHPokerCore
 
         private void EatButton_Click(object sender, EventArgs e)
         {
-            Utilities.SetStamina(socket, usb, "0A");
+            Utilities.SetStamina(socket, "0A");
 
             if (sound)
                 System.Media.SystemSounds.Asterisk.Play();
@@ -4552,7 +4551,7 @@ namespace ACNHPokerCore
 
         private void PoopButton_Click(object sender, EventArgs e)
         {
-            Utilities.SetStamina(socket, usb, "00");
+            Utilities.SetStamina(socket, "00");
 
             if (sound)
                 System.Media.SystemSounds.Asterisk.Play();
@@ -4562,7 +4561,7 @@ namespace ACNHPokerCore
         {
             string selectedColor = AirportColor.SelectedIndex.ToString();
 
-            Utilities.SetAirportColor(socket, usb, selectedColor);
+            Utilities.SetAirportColor(socket, selectedColor);
 
             if (sound)
                 System.Media.SystemSounds.Asterisk.Play();
@@ -4581,7 +4580,7 @@ namespace ACNHPokerCore
         {
             ButtonSelected(maxSpeedX1Btn, [maxSpeedX2Btn, maxSpeedX3Btn, maxSpeedX5Btn, maxSpeedX100Btn]);
 
-            Utilities.SetMaxSpeed(socket, usb, Utilities.MaxSpeedX1);
+            Utilities.SetMaxSpeed(socket, Utilities.MaxSpeedX1);
             if (sound)
                 System.Media.SystemSounds.Asterisk.Play();
         }
@@ -4590,7 +4589,7 @@ namespace ACNHPokerCore
         {
             ButtonSelected(maxSpeedX2Btn, [maxSpeedX1Btn, maxSpeedX3Btn, maxSpeedX5Btn, maxSpeedX100Btn]);
 
-            Utilities.SetMaxSpeed(socket, usb, Utilities.MaxSpeedX2);
+            Utilities.SetMaxSpeed(socket, Utilities.MaxSpeedX2);
             if (sound)
                 System.Media.SystemSounds.Asterisk.Play();
         }
@@ -4599,7 +4598,7 @@ namespace ACNHPokerCore
         {
             ButtonSelected(maxSpeedX3Btn, [maxSpeedX2Btn, maxSpeedX1Btn, maxSpeedX5Btn, maxSpeedX100Btn]);
 
-            Utilities.SetMaxSpeed(socket, usb, Utilities.MaxSpeedX3);
+            Utilities.SetMaxSpeed(socket, Utilities.MaxSpeedX3);
             if (sound)
                 System.Media.SystemSounds.Asterisk.Play();
         }
@@ -4608,7 +4607,7 @@ namespace ACNHPokerCore
         {
             ButtonSelected(maxSpeedX5Btn, [maxSpeedX2Btn, maxSpeedX3Btn, maxSpeedX1Btn, maxSpeedX100Btn]);
 
-            Utilities.SetMaxSpeed(socket, usb, Utilities.MaxSpeedX5);
+            Utilities.SetMaxSpeed(socket, Utilities.MaxSpeedX5);
             if (sound)
                 System.Media.SystemSounds.Asterisk.Play();
         }
@@ -4617,7 +4616,7 @@ namespace ACNHPokerCore
         {
             ButtonSelected(maxSpeedX100Btn, [maxSpeedX2Btn, maxSpeedX3Btn, maxSpeedX5Btn, maxSpeedX1Btn]);
 
-            Utilities.SetMaxSpeed(socket, usb, Utilities.MaxSpeedX100);
+            Utilities.SetMaxSpeed(socket, Utilities.MaxSpeedX100);
             if (sound)
                 System.Media.SystemSounds.Asterisk.Play();
         }
@@ -4627,13 +4626,13 @@ namespace ACNHPokerCore
             if (init) return;
             if (DisableCollisionToggle.Checked)
             {
-                Utilities.PokeMainAddress(socket, usb, Utilities.CollisionAddress.ToString("X"), Utilities.CollisionDisable);
-                Utilities.PokeMainAddress(socket, usb, Utilities.ActorCollisionAddress.ToString("X"), Utilities.ActorCollisionDisable);
+                Utilities.PokeMainAddress(socket, Utilities.CollisionAddress.ToString("X"), Utilities.CollisionDisable);
+                Utilities.PokeMainAddress(socket, Utilities.ActorCollisionAddress.ToString("X"), Utilities.ActorCollisionDisable);
             }
             else
             {
-                Utilities.PokeMainAddress(socket, usb, Utilities.CollisionAddress.ToString("X"), Utilities.CollisionEnable);
-                Utilities.PokeMainAddress(socket, usb, Utilities.ActorCollisionAddress.ToString("X"), Utilities.ActorCollisionEnable);
+                Utilities.PokeMainAddress(socket, Utilities.CollisionAddress.ToString("X"), Utilities.CollisionEnable);
+                Utilities.PokeMainAddress(socket, Utilities.ActorCollisionAddress.ToString("X"), Utilities.ActorCollisionEnable);
             }
             if (sound)
                 System.Media.SystemSounds.Asterisk.Play();
@@ -4644,11 +4643,11 @@ namespace ACNHPokerCore
             if (init) return;
             if (FastSwimToggle.Checked)
             {
-                Utilities.SetFastSwimSpeed(socket, usb, true);
+                Utilities.SetFastSwimSpeed(socket, true);
             }
             else
             {
-                Utilities.SetFastSwimSpeed(socket, usb, false);
+                Utilities.SetFastSwimSpeed(socket, false);
             }
             if (sound)
                 System.Media.SystemSounds.Asterisk.Play();
@@ -4658,7 +4657,7 @@ namespace ACNHPokerCore
         {
             ButtonSelected(animationSpeedx50, [animationSpeedx1, animationSpeedx2, animationSpeedx0_1, animationSpeedx5]);
 
-            Utilities.PokeMainAddress(socket, usb, Utilities.aSpeedAddress.ToString("X"), Utilities.aSpeedX50);
+            Utilities.PokeMainAddress(socket, Utilities.aSpeedAddress.ToString("X"), Utilities.aSpeedX50);
             if (sound)
                 System.Media.SystemSounds.Asterisk.Play();
         }
@@ -4667,7 +4666,7 @@ namespace ACNHPokerCore
         {
             ButtonSelected(animationSpeedx5, [animationSpeedx1, animationSpeedx2, animationSpeedx0_1, animationSpeedx50]);
 
-            Utilities.PokeMainAddress(socket, usb, Utilities.aSpeedAddress.ToString("X"), Utilities.aSpeedX5);
+            Utilities.PokeMainAddress(socket, Utilities.aSpeedAddress.ToString("X"), Utilities.aSpeedX5);
             if (sound)
                 System.Media.SystemSounds.Asterisk.Play();
         }
@@ -4676,7 +4675,7 @@ namespace ACNHPokerCore
         {
             ButtonSelected(animationSpeedx2, [animationSpeedx1, animationSpeedx50, animationSpeedx0_1, animationSpeedx5]);
 
-            Utilities.PokeMainAddress(socket, usb, Utilities.aSpeedAddress.ToString("X"), Utilities.aSpeedX2);
+            Utilities.PokeMainAddress(socket, Utilities.aSpeedAddress.ToString("X"), Utilities.aSpeedX2);
             if (sound)
                 System.Media.SystemSounds.Asterisk.Play();
         }
@@ -4685,7 +4684,7 @@ namespace ACNHPokerCore
         {
             ButtonSelected(animationSpeedx0_1, [animationSpeedx1, animationSpeedx2, animationSpeedx50, animationSpeedx5]);
 
-            Utilities.PokeMainAddress(socket, usb, Utilities.aSpeedAddress.ToString("X"), Utilities.aSpeedX01);
+            Utilities.PokeMainAddress(socket, Utilities.aSpeedAddress.ToString("X"), Utilities.aSpeedX01);
             if (sound)
                 System.Media.SystemSounds.Asterisk.Play();
         }
@@ -4694,18 +4693,18 @@ namespace ACNHPokerCore
         {
             ButtonSelected(animationSpeedx1, [animationSpeedx50, animationSpeedx2, animationSpeedx0_1, animationSpeedx5]);
 
-            Utilities.PokeMainAddress(socket, usb, Utilities.aSpeedAddress.ToString("X"), Utilities.aSpeedX1);
+            Utilities.PokeMainAddress(socket, Utilities.aSpeedAddress.ToString("X"), Utilities.aSpeedX1);
             if (sound)
                 System.Media.SystemSounds.Asterisk.Play();
         }
 
         private void ReadActivatedCheat()
         {
-            string MaxSpeed = Utilities.ByteToHexString(Utilities.PeekAddress(socket, usb, Utilities.MaxSpeedAddress, 4));
-            string SwimSpeed = Utilities.ByteToHexString(Utilities.PeekAddress(socket, usb, Utilities.SwimSpeed, 4));
-            string Collision = Utilities.Flip(Utilities.ByteToHexString(Utilities.PeekMainAddress(socket, usb, Utilities.CollisionAddress, 4)));
-            string AnimationSpeed = Utilities.Flip(Utilities.ByteToHexString(Utilities.PeekMainAddress(socket, usb, Utilities.aSpeedAddress, 4)));
-            string Magic = Utilities.Flip(Utilities.ByteToHexString(Utilities.PeekMainAddress(socket, usb, Utilities.MagicAddress, 4)));
+            string MaxSpeed = Utilities.ByteToHexString(Utilities.PeekAddress(socket, Utilities.MaxSpeedAddress, 4));
+            string SwimSpeed = Utilities.ByteToHexString(Utilities.PeekAddress(socket, Utilities.SwimSpeed, 4));
+            string Collision = Utilities.Flip(Utilities.ByteToHexString(Utilities.PeekMainAddress(socket, Utilities.CollisionAddress, 4)));
+            string AnimationSpeed = Utilities.Flip(Utilities.ByteToHexString(Utilities.PeekMainAddress(socket, Utilities.aSpeedAddress, 4)));
+            string Magic = Utilities.Flip(Utilities.ByteToHexString(Utilities.PeekMainAddress(socket, Utilities.MagicAddress, 4)));
 
             if (MaxSpeed.Equals(Utilities.MaxSpeedX1))
             { }
@@ -4748,7 +4747,7 @@ namespace ACNHPokerCore
             FreezeTimeButton.BackColor = Color.FromArgb(80, 80, 255);
             UnFreezeTimeButton.BackColor = Color.FromArgb(114, 137, 218);
 
-            Utilities.PokeMainAddress(socket, usb, Utilities.freezeTimeAddress.ToString("X"), Utilities.freezeTimeValue);
+            Utilities.PokeMainAddress(socket, Utilities.freezeTimeAddress.ToString("X"), Utilities.freezeTimeValue);
             Readtime();
             DateAndTimeControlPanel.Visible = true;
 
@@ -4761,7 +4760,7 @@ namespace ACNHPokerCore
             UnFreezeTimeButton.BackColor = Color.FromArgb(80, 80, 255);
             FreezeTimeButton.BackColor = Color.FromArgb(114, 137, 218);
 
-            Utilities.PokeMainAddress(socket, usb, Utilities.freezeTimeAddress.ToString("X"), Utilities.unfreezeTimeValue);
+            Utilities.PokeMainAddress(socket, Utilities.freezeTimeAddress.ToString("X"), Utilities.unfreezeTimeValue);
             DateAndTimeControlPanel.Visible = false;
             if (sound)
                 System.Media.SystemSounds.Asterisk.Play();
@@ -4769,7 +4768,7 @@ namespace ACNHPokerCore
 
         private void Readtime()
         {
-            byte[] b = Utilities.PeekAddress(socket, usb, Utilities.readTimeAddress, 6);
+            byte[] b = Utilities.PeekAddress(socket, Utilities.readTimeAddress, 6);
             string time = Utilities.ByteToHexString(b);
 
             Debug.Print(time);
@@ -4782,7 +4781,7 @@ namespace ACNHPokerCore
 
             if (year > 3000 || month > 12 || day > 31 || hour > 24 || min > 60) //Try for Chineses
             {
-                b = Utilities.PeekAddress(socket, usb, Utilities.readTimeAddress + Utilities.ChineseLanguageOffset, 6);
+                b = Utilities.PeekAddress(socket, Utilities.readTimeAddress + Utilities.ChineseLanguageOffset, 6);
                 time = Utilities.ByteToHexString(b);
 
                 year = Convert.ToInt32(Utilities.Flip(time.Substring(0, 4)), 16);
@@ -4881,13 +4880,13 @@ namespace ACNHPokerCore
 
             if (ChineseFlag)
             {
-                Utilities.PokeAddress(socket, usb, (Utilities.readTimeAddress + Utilities.ChineseLanguageOffset).ToString("X"), Utilities.Flip(Utilities.PrecedingZeros(hexYear, 4)));
-                Utilities.PokeAddress(socket, usb, (Utilities.readTimeAddress + 0x2 + Utilities.ChineseLanguageOffset).ToString("X"), Utilities.PrecedingZeros(hexMonth, 2) + Utilities.PrecedingZeros(hexDay, 2) + Utilities.PrecedingZeros(hexHour, 2) + Utilities.PrecedingZeros(hexMin, 2));
+                Utilities.PokeAddress(socket, (Utilities.readTimeAddress + Utilities.ChineseLanguageOffset).ToString("X"), Utilities.Flip(Utilities.PrecedingZeros(hexYear, 4)));
+                Utilities.PokeAddress(socket, (Utilities.readTimeAddress + 0x2 + Utilities.ChineseLanguageOffset).ToString("X"), Utilities.PrecedingZeros(hexMonth, 2) + Utilities.PrecedingZeros(hexDay, 2) + Utilities.PrecedingZeros(hexHour, 2) + Utilities.PrecedingZeros(hexMin, 2));
             }
             else
             {
-                Utilities.PokeAddress(socket, usb, Utilities.readTimeAddress.ToString("X"), Utilities.Flip(Utilities.PrecedingZeros(hexYear, 4)));
-                Utilities.PokeAddress(socket, usb, (Utilities.readTimeAddress + 0x2).ToString("X"), Utilities.PrecedingZeros(hexMonth, 2) + Utilities.PrecedingZeros(hexDay, 2) + Utilities.PrecedingZeros(hexHour, 2) + Utilities.PrecedingZeros(hexMin, 2));
+                Utilities.PokeAddress(socket, Utilities.readTimeAddress.ToString("X"), Utilities.Flip(Utilities.PrecedingZeros(hexYear, 4)));
+                Utilities.PokeAddress(socket, (Utilities.readTimeAddress + 0x2).ToString("X"), Utilities.PrecedingZeros(hexMonth, 2) + Utilities.PrecedingZeros(hexDay, 2) + Utilities.PrecedingZeros(hexHour, 2) + Utilities.PrecedingZeros(hexMin, 2));
             }
 
             if (sound)
@@ -4918,35 +4917,35 @@ namespace ACNHPokerCore
                         string hexYear = decYear.ToString("X");
 
                         if (ChineseFlag)
-                            Utilities.PokeAddress(socket, usb, (Utilities.readTimeAddress + Utilities.ChineseLanguageOffset).ToString("X"), Utilities.PrecedingZeros(hexYear, 4) + Utilities.PrecedingZeros(hexMonth, 2) + Utilities.PrecedingZeros(hexDay, 2) + Utilities.PrecedingZeros(hexHour, 2));
+                            Utilities.PokeAddress(socket, (Utilities.readTimeAddress + Utilities.ChineseLanguageOffset).ToString("X"), Utilities.PrecedingZeros(hexYear, 4) + Utilities.PrecedingZeros(hexMonth, 2) + Utilities.PrecedingZeros(hexDay, 2) + Utilities.PrecedingZeros(hexHour, 2));
                         else
-                            Utilities.PokeAddress(socket, usb, (Utilities.readTimeAddress).ToString("X"), Utilities.PrecedingZeros(hexYear, 4) + Utilities.PrecedingZeros(hexMonth, 2) + Utilities.PrecedingZeros(hexDay, 2) + Utilities.PrecedingZeros(hexHour, 2));
+                            Utilities.PokeAddress(socket, (Utilities.readTimeAddress).ToString("X"), Utilities.PrecedingZeros(hexYear, 4) + Utilities.PrecedingZeros(hexMonth, 2) + Utilities.PrecedingZeros(hexDay, 2) + Utilities.PrecedingZeros(hexHour, 2));
                     }
                     else
                     {
                         string hexMonth = decMonth.ToString("X");
                         if (ChineseFlag)
-                            Utilities.PokeAddress(socket, usb, (Utilities.readTimeAddress + 0x2 + Utilities.ChineseLanguageOffset).ToString("X"), Utilities.PrecedingZeros(hexMonth, 2) + Utilities.PrecedingZeros(hexDay, 2) + Utilities.PrecedingZeros(hexHour, 2));
+                            Utilities.PokeAddress(socket, (Utilities.readTimeAddress + 0x2 + Utilities.ChineseLanguageOffset).ToString("X"), Utilities.PrecedingZeros(hexMonth, 2) + Utilities.PrecedingZeros(hexDay, 2) + Utilities.PrecedingZeros(hexHour, 2));
                         else
-                            Utilities.PokeAddress(socket, usb, (Utilities.readTimeAddress + 0x2).ToString("X"), Utilities.PrecedingZeros(hexMonth, 2) + Utilities.PrecedingZeros(hexDay, 2) + Utilities.PrecedingZeros(hexHour, 2));
+                            Utilities.PokeAddress(socket, (Utilities.readTimeAddress + 0x2).ToString("X"), Utilities.PrecedingZeros(hexMonth, 2) + Utilities.PrecedingZeros(hexDay, 2) + Utilities.PrecedingZeros(hexHour, 2));
                     }
                 }
                 else
                 {
                     string hexDay = decDay.ToString("X");
                     if (ChineseFlag)
-                        Utilities.PokeAddress(socket, usb, (Utilities.readTimeAddress + 0x3 + Utilities.ChineseLanguageOffset).ToString("X"), Utilities.PrecedingZeros(hexDay, 2) + Utilities.PrecedingZeros(hexHour, 2));
+                        Utilities.PokeAddress(socket, (Utilities.readTimeAddress + 0x3 + Utilities.ChineseLanguageOffset).ToString("X"), Utilities.PrecedingZeros(hexDay, 2) + Utilities.PrecedingZeros(hexHour, 2));
                     else
-                        Utilities.PokeAddress(socket, usb, (Utilities.readTimeAddress + 0x3).ToString("X"), Utilities.PrecedingZeros(hexDay, 2) + Utilities.PrecedingZeros(hexHour, 2));
+                        Utilities.PokeAddress(socket, (Utilities.readTimeAddress + 0x3).ToString("X"), Utilities.PrecedingZeros(hexDay, 2) + Utilities.PrecedingZeros(hexHour, 2));
                 }
             }
             else
             {
                 string hexHour = decHour.ToString("X");
                 if (ChineseFlag)
-                    Utilities.PokeAddress(socket, usb, (Utilities.readTimeAddress + 0x4 + Utilities.ChineseLanguageOffset).ToString("X"), Utilities.PrecedingZeros(hexHour, 2));
+                    Utilities.PokeAddress(socket, (Utilities.readTimeAddress + 0x4 + Utilities.ChineseLanguageOffset).ToString("X"), Utilities.PrecedingZeros(hexHour, 2));
                 else
-                    Utilities.PokeAddress(socket, usb, (Utilities.readTimeAddress + 0x4).ToString("X"), Utilities.PrecedingZeros(hexHour, 2));
+                    Utilities.PokeAddress(socket, (Utilities.readTimeAddress + 0x4).ToString("X"), Utilities.PrecedingZeros(hexHour, 2));
             }
             Readtime();
             if (sound)
@@ -4977,35 +4976,35 @@ namespace ACNHPokerCore
                         string hexYear = decYear.ToString("X");
 
                         if (ChineseFlag)
-                            Utilities.PokeAddress(socket, usb, (Utilities.readTimeAddress + Utilities.ChineseLanguageOffset).ToString("X"), Utilities.PrecedingZeros(hexYear, 4) + Utilities.PrecedingZeros(hexMonth, 2) + Utilities.PrecedingZeros(hexDay, 2) + Utilities.PrecedingZeros(hexHour, 2));
+                            Utilities.PokeAddress(socket, (Utilities.readTimeAddress + Utilities.ChineseLanguageOffset).ToString("X"), Utilities.PrecedingZeros(hexYear, 4) + Utilities.PrecedingZeros(hexMonth, 2) + Utilities.PrecedingZeros(hexDay, 2) + Utilities.PrecedingZeros(hexHour, 2));
                         else
-                            Utilities.PokeAddress(socket, usb, (Utilities.readTimeAddress).ToString("X"), Utilities.PrecedingZeros(hexYear, 4) + Utilities.PrecedingZeros(hexMonth, 2) + Utilities.PrecedingZeros(hexDay, 2) + Utilities.PrecedingZeros(hexHour, 2));
+                            Utilities.PokeAddress(socket, (Utilities.readTimeAddress).ToString("X"), Utilities.PrecedingZeros(hexYear, 4) + Utilities.PrecedingZeros(hexMonth, 2) + Utilities.PrecedingZeros(hexDay, 2) + Utilities.PrecedingZeros(hexHour, 2));
                     }
                     else
                     {
                         string hexMonth = decMonth.ToString("X");
                         if (ChineseFlag)
-                            Utilities.PokeAddress(socket, usb, (Utilities.readTimeAddress + 0x2 + Utilities.ChineseLanguageOffset).ToString("X"), Utilities.PrecedingZeros(hexMonth, 2) + Utilities.PrecedingZeros(hexDay, 2) + Utilities.PrecedingZeros(hexHour, 2));
+                            Utilities.PokeAddress(socket, (Utilities.readTimeAddress + 0x2 + Utilities.ChineseLanguageOffset).ToString("X"), Utilities.PrecedingZeros(hexMonth, 2) + Utilities.PrecedingZeros(hexDay, 2) + Utilities.PrecedingZeros(hexHour, 2));
                         else
-                            Utilities.PokeAddress(socket, usb, (Utilities.readTimeAddress + 0x2).ToString("X"), Utilities.PrecedingZeros(hexMonth, 2) + Utilities.PrecedingZeros(hexDay, 2) + Utilities.PrecedingZeros(hexHour, 2));
+                            Utilities.PokeAddress(socket, (Utilities.readTimeAddress + 0x2).ToString("X"), Utilities.PrecedingZeros(hexMonth, 2) + Utilities.PrecedingZeros(hexDay, 2) + Utilities.PrecedingZeros(hexHour, 2));
                     }
                 }
                 else
                 {
                     string hexDay = decDay.ToString("X");
                     if (ChineseFlag)
-                        Utilities.PokeAddress(socket, usb, (Utilities.readTimeAddress + 0x3 + Utilities.ChineseLanguageOffset).ToString("X"), Utilities.PrecedingZeros(hexDay, 2) + Utilities.PrecedingZeros(hexHour, 2));
+                        Utilities.PokeAddress(socket, (Utilities.readTimeAddress + 0x3 + Utilities.ChineseLanguageOffset).ToString("X"), Utilities.PrecedingZeros(hexDay, 2) + Utilities.PrecedingZeros(hexHour, 2));
                     else
-                        Utilities.PokeAddress(socket, usb, (Utilities.readTimeAddress + 0x3).ToString("X"), Utilities.PrecedingZeros(hexDay, 2) + Utilities.PrecedingZeros(hexHour, 2));
+                        Utilities.PokeAddress(socket, (Utilities.readTimeAddress + 0x3).ToString("X"), Utilities.PrecedingZeros(hexDay, 2) + Utilities.PrecedingZeros(hexHour, 2));
                 }
             }
             else
             {
                 string hexHour = decHour.ToString("X");
                 if (ChineseFlag)
-                    Utilities.PokeAddress(socket, usb, (Utilities.readTimeAddress + 0x4 + Utilities.ChineseLanguageOffset).ToString("X"), Utilities.PrecedingZeros(hexHour, 2));
+                    Utilities.PokeAddress(socket, (Utilities.readTimeAddress + 0x4 + Utilities.ChineseLanguageOffset).ToString("X"), Utilities.PrecedingZeros(hexHour, 2));
                 else
-                    Utilities.PokeAddress(socket, usb, (Utilities.readTimeAddress + 0x4).ToString("X"), Utilities.PrecedingZeros(hexHour, 2));
+                    Utilities.PokeAddress(socket, (Utilities.readTimeAddress + 0x4).ToString("X"), Utilities.PrecedingZeros(hexHour, 2));
             }
             Readtime();
             if (sound)
@@ -5020,7 +5019,7 @@ namespace ACNHPokerCore
         {
             MyLog.LogEvent("MainForm", "Reading Turnip Prices :");
 
-            ulong[] turnipPrices = Utilities.GetTurnipPrices(socket, usb);
+            ulong[] turnipPrices = Utilities.GetTurnipPrices(socket);
             turnipBuyPrice.Clear();
             turnipBuyPrice.SelectionAlignment = HorizontalAlignment.Center;
             turnipBuyPrice.Text = $@"{turnipPrices[12]}";
@@ -5171,7 +5170,7 @@ namespace ACNHPokerCore
 
                 try
                 {
-                    Utilities.ChangeTurnipPrices(socket, usb, prices);
+                    Utilities.ChangeTurnipPrices(socket, prices);
                     UpdateTurnipPrices();
                 }
                 catch (Exception ex)
@@ -5202,7 +5201,7 @@ namespace ACNHPokerCore
 
             try
             {
-                Utilities.ChangeTurnipPrices(socket, usb, prices);
+                Utilities.ChangeTurnipPrices(socket, prices);
                 UpdateTurnipPrices();
             }
             catch (Exception ex)
@@ -5244,7 +5243,7 @@ namespace ACNHPokerCore
 
                 try
                 {
-                    Utilities.ChangeTurnipPrices(socket, usb, prices);
+                    Utilities.ChangeTurnipPrices(socket, prices);
                     UpdateTurnipPrices();
                 }
                 catch (Exception ex)
@@ -5404,14 +5403,14 @@ namespace ACNHPokerCore
                         b[i + 1] = 0;
                     }
                 //Debug.Print(Encoding.UTF8.GetString(Utilities.transform(b)));
-                Utilities.SendSpawnRate(socket, usb, b, localIndex, type, ref counter);
+                Utilities.SendSpawnRate(socket, b, localIndex, type, ref counter);
                 localIndex++;
                 if (mode == 1)
                 {
                     for (int i = 0; i < b.Length; i++)
                         b[i] = source[size * localIndex + 2 + i];
                 }
-                Utilities.SendSpawnRate(socket, usb, b, localIndex, type, ref counter);
+                Utilities.SendSpawnRate(socket, b, localIndex, type, ref counter);
             }
             catch (Exception e)
             {
@@ -6331,7 +6330,7 @@ namespace ACNHPokerCore
             {
                 if (currentGridView == InsectGridView)
                 {
-                    InsectAppearParam = Utilities.GetCritterData(socket, usb, 0);
+                    InsectAppearParam = Utilities.GetCritterData(socket, 0);
                     File.WriteAllBytes(insectAppearFileName, InsectAppearParam);
 
                     Invoke((MethodInvoker)delegate
@@ -6344,7 +6343,7 @@ namespace ACNHPokerCore
                 }
                 else if (currentGridView == RiverFishGridView)
                 {
-                    FishRiverAppearParam = Utilities.GetCritterData(socket, usb, 1);
+                    FishRiverAppearParam = Utilities.GetCritterData(socket, 1);
                     File.WriteAllBytes(fishRiverAppearFileName, FishRiverAppearParam);
 
                     Invoke((MethodInvoker)delegate
@@ -6357,7 +6356,7 @@ namespace ACNHPokerCore
                 }
                 else if (currentGridView == SeaFishGridView)
                 {
-                    FishSeaAppearParam = Utilities.GetCritterData(socket, usb, 2);
+                    FishSeaAppearParam = Utilities.GetCritterData(socket, 2);
                     File.WriteAllBytes(fishSeaAppearFileName, FishSeaAppearParam);
 
                     Invoke((MethodInvoker)delegate
@@ -6370,7 +6369,7 @@ namespace ACNHPokerCore
                 }
                 else if (currentGridView == SeaCreatureGridView)
                 {
-                    CreatureSeaAppearParam = Utilities.GetCritterData(socket, usb, 3);
+                    CreatureSeaAppearParam = Utilities.GetCritterData(socket, 3);
                     File.WriteAllBytes(CreatureSeaAppearFileName, CreatureSeaAppearParam);
 
                     Invoke((MethodInvoker)delegate
@@ -6403,12 +6402,9 @@ namespace ACNHPokerCore
         {
             lock (villagerLock)
             {
-                if (usb == null)
                     ShowVillagerWait(25000, "Acquiring villager data...");
-                else
-                    ShowVillagerWait(15000, "Acquiring villager data...");
 
-                if ((socket == null || socket.Connected == false) && usb == null && !Utilities.isEmulator)
+                if ((socket == null || socket.Connected == false) && !Utilities.isEmulator)
                 {
                     HideVillagerWait();
                     return;
@@ -6421,7 +6417,7 @@ namespace ACNHPokerCore
 
                 for (int i = 0; i < 10; i++)
                 {
-                    byte b = Utilities.GetHouseOwner(socket, usb, i, ref counter);
+                    byte b = Utilities.GetHouseOwner(socket, i, ref counter);
                     if (b == 0xDD)
                     {
                         HideVillagerWait();
@@ -6437,20 +6433,20 @@ namespace ACNHPokerCore
 
                 for (int i = 0; i < 10; i++)
                 {
-                    byte[] b = Utilities.GetVillager(socket, usb, i, (int)(Utilities.VillagerMemoryTinySize), ref counter);
+                    byte[] b = Utilities.GetVillager(socket, i, (int)(Utilities.VillagerMemoryTinySize), ref counter);
                     V[i] = new Villager(b, i)
                     {
                         HouseIndex = Utilities.FindHouseIndex(i, HouseList)
                     };
 
-                    byte f = Utilities.GetVillagerHouseFlag(socket, usb, V[i].HouseIndex, 0x8, ref counter);
+                    byte f = Utilities.GetVillagerHouseFlag(socket, V[i].HouseIndex, 0x8, ref counter);
                     V[i].MoveInFlag = Convert.ToInt32(f);
 
-                    byte[] move = Utilities.GetMoveout(socket, usb, i, 0x33, ref counter);
+                    byte[] move = Utilities.GetMoveout(socket, i, 0x33, ref counter);
                     V[i].AbandonedHouseFlag = Convert.ToInt32(move[0]);
                     V[i].InvitedFlag = Convert.ToInt32(move[0x14]);
                     V[i].ForceMoveOutFlag = Convert.ToInt32(move[move.Length - 1]);
-                    byte[] catchphrase = Utilities.GetCatchphrase(socket, usb, i, ref counter);
+                    byte[] catchphrase = Utilities.GetCatchphrase(socket, i, ref counter);
                     V[i].Catchphrase = catchphrase;
 
                     int friendship = V[i].Friendship[0];
@@ -6580,10 +6576,7 @@ namespace ACNHPokerCore
                 VillagerNowLoadingLongMessage.SelectionAlignment = HorizontalAlignment.Center;
                 VillagerNowLoadingLongMessage.Text = msg;
                 counter = 0;
-                if (usb == null)
-                    VillagerNowLoadingProgressBar.Maximum = size / 500 + 5;
-                else
-                    VillagerNowLoadingProgressBar.Maximum = size / 300 + 5;
+                VillagerNowLoadingProgressBar.Maximum = size / 500 + 5;
                 Debug.Print("Max : " + VillagerNowLoadingProgressBar.Maximum);
                 VillagerNowLoadingProgressBar.Value = counter;
                 VillagerNowLoadingPanel.Visible = true;
@@ -6762,7 +6755,7 @@ namespace ACNHPokerCore
             else
                 img = new Bitmap(Properties.Resources.Leaf, new Size(128, 128));
 
-            Friendship friendship = new(i, socket, usb, img, V[i], sound);
+            Friendship friendship = new(i, socket, img, V[i], sound);
             friendship.ShowDialog();
 
             RefreshVillagerUI(false);
@@ -6781,7 +6774,7 @@ namespace ACNHPokerCore
                 phrase[j] = temp[j];
             }
 
-            Utilities.SetCatchphrase(socket, usb, i, phrase);
+            Utilities.SetCatchphrase(socket, i, phrase);
 
             V[i].Catchphrase = phrase;
             RefreshVillagerUI(false);
@@ -6797,7 +6790,7 @@ namespace ACNHPokerCore
             int i = Int16.Parse(VillagerIndex.Text);
             byte[] phrase = new byte[44];
 
-            Utilities.SetCatchphrase(socket, usb, i, phrase);
+            Utilities.SetCatchphrase(socket, i, phrase);
 
             V[i].Catchphrase = phrase;
             RefreshVillagerUI(false);
@@ -6934,8 +6927,8 @@ namespace ACNHPokerCore
             V[i].HouseIndex = j;
             HouseList[j] = i;
 
-            Utilities.LoadVillager(socket, usb, i, modifiedVillager, ref counter);
-            Utilities.LoadHouse(socket, usb, j, modifiedHouse, ref counter);
+            Utilities.LoadVillager(socket, i, modifiedVillager, ref counter);
+            Utilities.LoadHouse(socket, j, modifiedHouse, ref counter);
 
             Invoke((MethodInvoker)delegate
             {
@@ -6956,7 +6949,7 @@ namespace ACNHPokerCore
                 return;
             int i = Int16.Parse(VillagerIndex.Text);
 
-            Utilities.SetMoveout(socket, usb, i);
+            Utilities.SetMoveout(socket, i);
 
             V[i].AbandonedHouseFlag = 2;
             V[i].ForceMoveOutFlag = 1;
@@ -6973,7 +6966,7 @@ namespace ACNHPokerCore
                 return;
             int i = Int16.Parse(VillagerIndex.Text);
 
-            Utilities.SetMoveout(socket, usb, i, "2", "0");
+            Utilities.SetMoveout(socket, i, "2", "0");
 
             V[i].AbandonedHouseFlag = 2;
             V[i].ForceMoveOutFlag = 0;
@@ -6990,7 +6983,7 @@ namespace ACNHPokerCore
                 return;
             int i = Int16.Parse(VillagerIndex.Text);
 
-            Utilities.SetMoveout(socket, usb, i, "0", "0");
+            Utilities.SetMoveout(socket, i, "0", "0");
 
             V[i].AbandonedHouseFlag = 0;
             V[i].ForceMoveOutFlag = 0;
@@ -7005,7 +6998,7 @@ namespace ACNHPokerCore
         {
             for (int i = 0; i < 10; i++)
             {
-                Utilities.SetMoveout(socket, usb, i);
+                Utilities.SetMoveout(socket, i);
 
                 V[i].AbandonedHouseFlag = 2;
                 V[i].ForceMoveOutFlag = 1;
@@ -7021,7 +7014,7 @@ namespace ACNHPokerCore
         {
             for (int i = 0; i < 10; i++)
             {
-                Utilities.SetMoveout(socket, usb, i, "2", "0");
+                Utilities.SetMoveout(socket, i, "2", "0");
 
                 V[i].AbandonedHouseFlag = 2;
                 V[i].ForceMoveOutFlag = 0;
@@ -7037,7 +7030,7 @@ namespace ACNHPokerCore
         {
             for (int i = 0; i < 10; i++)
             {
-                Utilities.SetMoveout(socket, usb, i, "0", "0");
+                Utilities.SetMoveout(socket, i, "0", "0");
 
                 V[i].AbandonedHouseFlag = 0;
                 V[i].ForceMoveOutFlag = 0;
@@ -7100,7 +7093,7 @@ namespace ACNHPokerCore
 
             VillagerLoading = true;
 
-            byte[] villagerData = Utilities.GetVillager(socket, usb, i, (int)Utilities.VillagerSize, ref counter);
+            byte[] villagerData = Utilities.GetVillager(socket, i, (int)Utilities.VillagerSize, ref counter);
             File.WriteAllBytes(file.FileName, villagerData);
 
             byte[] checkData = File.ReadAllBytes(file.FileName);
@@ -7178,7 +7171,7 @@ namespace ACNHPokerCore
         {
             ShowVillagerWait((int)Utilities.VillagerHouseSize, "Dumping " + V[i].GetRealName() + "'s House ...");
 
-            byte[] house = Utilities.GetHouse(socket, usb, j, ref counter);
+            byte[] house = Utilities.GetHouse(socket, j, ref counter);
             File.WriteAllBytes(file.FileName, house);
             if (sound)
                 System.Media.SystemSounds.Asterisk.Play();
@@ -7272,7 +7265,7 @@ namespace ACNHPokerCore
             Buffer.BlockCopy(villager, (int)Utilities.VillagerCatchphraseOffset, phrase, 0x0, 44);
             V[i].Catchphrase = phrase;
 
-            Utilities.LoadVillager(socket, usb, i, modifiedVillager, ref counter);
+            Utilities.LoadVillager(socket, i, modifiedVillager, ref counter);
 
             Invoke((MethodInvoker)delegate
             {
@@ -7361,7 +7354,7 @@ namespace ACNHPokerCore
             V[i].HouseIndex = j;
             HouseList[j] = i;
 
-            Utilities.LoadHouse(socket, usb, j, modifiedHouse, ref counter);
+            Utilities.LoadHouse(socket, j, modifiedHouse, ref counter);
 
             Invoke((MethodInvoker)delegate
             {
@@ -7373,7 +7366,7 @@ namespace ACNHPokerCore
 
         private void ReadMysVillagerButton_Click(object sender, EventArgs e)
         {
-            byte[] IName = Utilities.GetMysVillagerName(socket, usb);
+            byte[] IName = Utilities.GetMysVillagerName(socket);
             string StrName = Encoding.ASCII.GetString(Utilities.ByteTrim(IName));
             string RealName = Utilities.GetVillagerRealName(StrName);
 
@@ -7411,7 +7404,7 @@ namespace ACNHPokerCore
             {
                 byte[] IName = Encoding.Default.GetBytes(lines[lines.Length - 1]);
                 byte[] species = [Utilities.CheckSpecies[(lines[lines.Length - 1]).Substring(0, 3)]];
-                Utilities.SetMysVillager(socket, usb, IName, species, ref counter);
+                Utilities.SetMysVillager(socket, IName, species, ref counter);
 
                 Image img;
                 string path = Utilities.GetVillagerImage(lines[lines.Length - 1]);
@@ -8314,7 +8307,7 @@ namespace ACNHPokerCore
                         UInt16 intId = Convert.ToUInt16(itemId, 16);
                         string hexValue = Utilities.PrecedingZeros(itemData, 8);
 
-                        Utilities.SpawnItem(socket, usb, slotId, flag0 + flag1 + itemId, Utilities.PrecedingZeros(itemData, 8));
+                        Utilities.SpawnItem(socket, slotId, flag0 + flag1 + itemId, Utilities.PrecedingZeros(itemData, 8));
                         UpdateInventory();
                         MyLog.LogEvent("Online", "slotId: " + slotId.ToString() + " itemId: " + itemId + " itemData: " + itemData + " recipeData: " + recipeData + " Flag0: " + flag0 + " Flag1: " + flag1);
 
@@ -10140,6 +10133,8 @@ namespace ACNHPokerCore
 
         #endregion
 
+
+        /*
         #region USB Connect
 
         private void USBConnectionButton_Click(object sender, EventArgs e)
@@ -10236,8 +10231,8 @@ namespace ACNHPokerCore
                 Text = version;
             }
         }
-
         #endregion
+        */
 
         #region Debug
 
@@ -10283,7 +10278,7 @@ namespace ACNHPokerCore
                 inventory2[i] = Convert.ToByte(tempStr2, 16);
             }
 
-            Utilities.OverwriteAll(socket, usb, inventory1, inventory2, ref iterator);
+            Utilities.OverwriteAll(socket, inventory1, inventory2, ref iterator);
 
             UpdateInventory();
             if (sound)
@@ -10349,7 +10344,7 @@ namespace ACNHPokerCore
         private void PeekButton_Click(object sender, EventArgs e)
         {
             var address = Convert.ToUInt32(DebugAddress.Text, 16);
-            byte[] addressBank = Utilities.PeekAddress(socket, null, address, 256);
+            byte[] addressBank = Utilities.PeekAddress(socket, address, 256);
 
             byte[] firstBytes = new byte[4];
             byte[] secondBytes = new byte[4];
@@ -10398,13 +10393,13 @@ namespace ACNHPokerCore
 
         private void PokeButton_Click(object sender, EventArgs e)
         {
-            Utilities.PokeAddress(socket, null, DebugAddress.Text, DebugValue.Text);
+            Utilities.PokeAddress(socket, DebugAddress.Text, DebugValue.Text);
         }
 
         private void PeekMButton_Click(object sender, EventArgs e)
         {
             var address = Convert.ToUInt32(DebugAddress.Text, 16);
-            byte[] addressBank = Utilities.PeekMainAddress(socket, null, address, 256);
+            byte[] addressBank = Utilities.PeekMainAddress(socket, address, 256);
 
             byte[] firstBytes = new byte[4];
             byte[] secondBytes = new byte[4];
@@ -10452,7 +10447,7 @@ namespace ACNHPokerCore
         }
         private void PokeMButton_Click(object sender, EventArgs e)
         {
-            Utilities.PokeMainAddress(socket, null, DebugAddress.Text, DebugValue.Text);
+            Utilities.PokeMainAddress(socket, DebugAddress.Text, DebugValue.Text);
         }
 
         private void UnhideButton_Click(object sender, EventArgs e)
@@ -10473,7 +10468,7 @@ namespace ACNHPokerCore
 
         private void VersionButton_Click(object sender, EventArgs e)
         {
-            MyMessageBox.Show(Utilities.CheckSysBotBase(socket, usb), "Sys-botbase Version");
+            MyMessageBox.Show(Utilities.CheckSysBotBase(socket), "Sys-botbase Version");
         }
 
         private void CheckStateButton_Click(object sender, EventArgs e)
@@ -10501,33 +10496,33 @@ namespace ACNHPokerCore
             if (init) return;
             if (StarFragmentToggle.Checked)
             {
-                Utilities.PokeMainAddress(socket, usb, Utilities.MagicAddress.ToString("X"), Utilities.MagicOn);
-                Utilities.PokeMainAddress(socket, usb, (Utilities.MagicAddress + 0x14).ToString("X"), Utilities.MagicOn);
+                Utilities.PokeMainAddress(socket, Utilities.MagicAddress.ToString("X"), Utilities.MagicOn);
+                Utilities.PokeMainAddress(socket, (Utilities.MagicAddress + 0x14).ToString("X"), Utilities.MagicOn);
 
-                Utilities.PokeMainAddress(socket, usb, Utilities.PetalsAddress.ToString("X"), Utilities.PetalsEnable);
-                Utilities.PokeMainAddress(socket, usb, Utilities.PetalsIntensityAddress.ToString("X"), Utilities.PetalsIntensityMAX);
-                //Utilities.PokeMainAddress(socket, usb, Utilities.ParticleScaleAddress.ToString("X"), Utilities.ParticleScaleMAX);
-                Utilities.PokeMainAddress(socket, usb, Utilities.EatAllAddress.ToString("X"), Utilities.EatAllEnable);
-                Utilities.PokeMainAddress(socket, usb, Utilities.EatAll2Address.ToString("X"), Utilities.EatAll2Enable);
+                Utilities.PokeMainAddress(socket, Utilities.PetalsAddress.ToString("X"), Utilities.PetalsEnable);
+                Utilities.PokeMainAddress(socket, Utilities.PetalsIntensityAddress.ToString("X"), Utilities.PetalsIntensityMAX);
+                //Utilities.PokeMainAddress(socket, Utilities.ParticleScaleAddress.ToString("X"), Utilities.ParticleScaleMAX);
+                Utilities.PokeMainAddress(socket, Utilities.EatAllAddress.ToString("X"), Utilities.EatAllEnable);
+                Utilities.PokeMainAddress(socket, Utilities.EatAll2Address.ToString("X"), Utilities.EatAll2Enable);
 
-                //Utilities.PokeMainAddress(socket, usb, Utilities.LeavesAddress.ToString("X"), Utilities.LeavesEnable);
-                Utilities.PokeMainAddress(socket, usb, Utilities.ShopAddress.ToString("X"), Utilities.ShopOpen);
-                //Utilities.PokeMainAddress(socket, usb, Utilities.BGMAddress.ToString("X"), Utilities.BGMDisable);
+                //Utilities.PokeMainAddress(socket, Utilities.LeavesAddress.ToString("X"), Utilities.LeavesEnable);
+                Utilities.PokeMainAddress(socket, Utilities.ShopAddress.ToString("X"), Utilities.ShopOpen);
+                //Utilities.PokeMainAddress(socket, Utilities.BGMAddress.ToString("X"), Utilities.BGMDisable);
             }
             else
             {
-                Utilities.PokeMainAddress(socket, usb, Utilities.MagicAddress.ToString("X"), Utilities.MagicOff);
-                Utilities.PokeMainAddress(socket, usb, (Utilities.MagicAddress + 0x14).ToString("X"), Utilities.MagicOff);
+                Utilities.PokeMainAddress(socket, Utilities.MagicAddress.ToString("X"), Utilities.MagicOff);
+                Utilities.PokeMainAddress(socket, (Utilities.MagicAddress + 0x14).ToString("X"), Utilities.MagicOff);
 
-                Utilities.PokeMainAddress(socket, usb, Utilities.PetalsAddress.ToString("X"), Utilities.PetalsDisable);
-                Utilities.PokeMainAddress(socket, usb, Utilities.PetalsIntensityAddress.ToString("X"), Utilities.PetalsIntensityNormal);
-                //Utilities.PokeMainAddress(socket, usb, Utilities.ParticleScaleAddress.ToString("X"), Utilities.ParticleScaleNormal);
-                Utilities.PokeMainAddress(socket, usb, Utilities.EatAllAddress.ToString("X"), Utilities.EatAllDisable);
-                Utilities.PokeMainAddress(socket, usb, Utilities.EatAll2Address.ToString("X"), Utilities.EatAll2Disable);
+                Utilities.PokeMainAddress(socket, Utilities.PetalsAddress.ToString("X"), Utilities.PetalsDisable);
+                Utilities.PokeMainAddress(socket, Utilities.PetalsIntensityAddress.ToString("X"), Utilities.PetalsIntensityNormal);
+                //Utilities.PokeMainAddress(socket, Utilities.ParticleScaleAddress.ToString("X"), Utilities.ParticleScaleNormal);
+                Utilities.PokeMainAddress(socket, Utilities.EatAllAddress.ToString("X"), Utilities.EatAllDisable);
+                Utilities.PokeMainAddress(socket, Utilities.EatAll2Address.ToString("X"), Utilities.EatAll2Disable);
 
-                //Utilities.PokeMainAddress(socket, usb, Utilities.LeavesAddress.ToString("X"), Utilities.LeavesDisable);
-                Utilities.PokeMainAddress(socket, usb, Utilities.ShopAddress.ToString("X"), Utilities.ShopNormal);
-                //Utilities.PokeMainAddress(socket, usb, Utilities.BGMAddress.ToString("X"), Utilities.BGMEnable);
+                //Utilities.PokeMainAddress(socket, Utilities.LeavesAddress.ToString("X"), Utilities.LeavesDisable);
+                Utilities.PokeMainAddress(socket, Utilities.ShopAddress.ToString("X"), Utilities.ShopNormal);
+                //Utilities.PokeMainAddress(socket, Utilities.BGMAddress.ToString("X"), Utilities.BGMEnable);
             }
             if (sound)
                 System.Media.SystemSounds.Asterisk.Play();
@@ -10551,7 +10546,7 @@ namespace ACNHPokerCore
         {
             if (Ro == null)
             {
-                Ro = new(socket, usb, sound, DEBUGGING);
+                Ro = new(socket, sound, DEBUGGING);
                 Ro.CloseForm += Ro_closeForm;
                 Ro.Show();
             }
@@ -10677,9 +10672,9 @@ namespace ACNHPokerCore
             if (M == null)
             {
                 if (DEBUGGING)
-                    M = new Map(socket, usb, Utilities.itemPath, Utilities.recipePath, Utilities.flowerPath, Utilities.variationPath, Utilities.favPath, Utilities.imagePath, languageSetting, OverrideDict, sound, true);
+                    M = new Map(socket, Utilities.itemPath, Utilities.recipePath, Utilities.flowerPath, Utilities.variationPath, Utilities.favPath, Utilities.imagePath, languageSetting, OverrideDict, sound, true);
                 else
-                    M = new Map(socket, usb, Utilities.itemPath, Utilities.recipePath, Utilities.flowerPath, Utilities.variationPath, Utilities.favPath, Utilities.imagePath, languageSetting, OverrideDict, sound);
+                    M = new Map(socket, Utilities.itemPath, Utilities.recipePath, Utilities.flowerPath, Utilities.variationPath, Utilities.favPath, Utilities.imagePath, languageSetting, OverrideDict, sound);
                 M.CloseForm += MapDropperCloseForm;
                 M.Show();
             }
@@ -10717,7 +10712,7 @@ namespace ACNHPokerCore
         {
             if (B == null)
             {
-                B = new Bulldozer(socket, usb, sound, DEBUGGING);
+                B = new Bulldozer(socket, sound, DEBUGGING);
                 B.CloseForm += BulldozerCloseForm;
                 B.Show();
             }
@@ -10812,7 +10807,7 @@ namespace ACNHPokerCore
                 {
                     long fakeAddress = startAddress + offset + result - 4;
 
-                    byte[] nameBytes = Utilities.PeekAddress(socket, usb, (uint)fakeAddress + Utilities.InventoryNameOffset, 0x34);
+                    byte[] nameBytes = Utilities.PeekAddress(socket, (uint)fakeAddress + Utilities.InventoryNameOffset, 0x34);
                     string IslandName = Utilities.GetString(nameBytes, 4, 10);
                     string CharacterName = Utilities.GetString(nameBytes, 32, 10);
 
@@ -10830,7 +10825,7 @@ namespace ACNHPokerCore
 
                         for (int j = 1; j < 8; j++)
                         {
-                            byte[] bBefore = Utilities.PeekAddress(socket, usb, (uint)(fakeAddress - (j * Utilities.playerOffset)) + Utilities.InventoryNameOffset, 0x34);
+                            byte[] bBefore = Utilities.PeekAddress(socket, (uint)(fakeAddress - (j * Utilities.playerOffset)) + Utilities.InventoryNameOffset, 0x34);
 
                             if (Search(bBefore, namePattern) >= 0)
                                 offsetNumber++;

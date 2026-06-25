@@ -27,7 +27,6 @@ namespace ACNHPokerCore
     {
         #region Variable
         private static Socket s;
-        private readonly USBBot usb;
 
         private readonly DataTable source;
         private readonly DataTable recipeSource;
@@ -139,12 +138,11 @@ namespace ACNHPokerCore
         #endregion
 
         #region Form Load
-        public Map(Socket S, USBBot USB, string itemPath, string recipePath, string flowerPath, string variationPath, string favPath, string ImagePath, string LanguageSetting, Dictionary<string, string> overrideDict, bool Sound, bool Debugging = false)
+        public Map(Socket S, string itemPath, string recipePath, string flowerPath, string variationPath, string favPath, string ImagePath, string LanguageSetting, Dictionary<string, string> overrideDict, bool Sound, bool Debugging = false)
         {
             try
             {
                 s = S;
-                usb = USB;
 
                 if (File.Exists(itemPath))
                     source = LoadItemCSVWithKind(itemPath);
@@ -420,7 +418,7 @@ namespace ACNHPokerCore
                 return;
             }
 
-            if ((s == null || s.Connected == false) && usb == null && !Utilities.isEmulator)
+            if ((s == null || s.Connected == false) && !Utilities.isEmulator)
             {
                 MessageBox.Show(@"Please connect to the Switch first!");
                 return;
@@ -449,14 +447,14 @@ namespace ACNHPokerCore
             {
                 ShowMapWait((42 + 2) * 2, "Fetching Map...");
 
-                Layer1 = Utilities.GetMapLayer(s, usb, layer1Address, ref counter);
-                Layer2 = Utilities.GetMapLayer(s, usb, layer2Address, ref counter);
-                Acre = Utilities.GetAcre(s, usb);
-                Building = Utilities.GetBuilding(s, usb);
-                Terrain = Utilities.GetTerrain(s, usb);
-                ActivateLayer1 = Utilities.GetActivate(s, usb, Utilities.mapActivate, ref counter);
-                ActivateLayer2 = Utilities.GetActivate(s, usb, Utilities.mapActivate + Utilities.mapActivateSize, ref counter);
-                MapCustomDesgin = Utilities.GetCustomDesignMap(s, usb, ref counter);
+                Layer1 = Utilities.GetMapLayer(s, layer1Address, ref counter);
+                Layer2 = Utilities.GetMapLayer(s, layer2Address, ref counter);
+                Acre = Utilities.GetAcre(s);
+                Building = Utilities.GetBuilding(s);
+                Terrain = Utilities.GetTerrain(s);
+                ActivateLayer1 = Utilities.GetActivate(s, Utilities.mapActivate, ref counter);
+                ActivateLayer2 = Utilities.GetActivate(s, Utilities.mapActivate + Utilities.mapActivateSize, ref counter);
+                MapCustomDesgin = Utilities.GetCustomDesignMap(s, ref counter);
 
                 if (saveFile)
                 {
@@ -488,7 +486,7 @@ namespace ACNHPokerCore
                 BuildActivateTable(ActivateLayer2, ref ActivateTable2);
 
 
-                byte[] Coordinate = Utilities.GetCoordinate(s, usb);
+                byte[] Coordinate = Utilities.GetCoordinate(s);
 
                 if (Coordinate != null)
                 {
@@ -2270,21 +2268,21 @@ namespace ACNHPokerCore
         {
             if (e.KeyCode.ToString() == "F2" || e.KeyCode.ToString() == "Insert")
             {
-                if (selectedButton != null & (s != null || usb != null))
+                if (selectedButton != null & (s != null))
                 {
                     DropItem(selectedButton);
                 }
             }
             else if (e.KeyCode.ToString() == "F1") // Delete
             {
-                if (selectedButton != null & (s != null || usb != null))
+                if (selectedButton != null & (s != null))
                 {
                     DeleteItem(selectedButton);
                 }
             }
             else if (e.KeyCode.ToString() == "F3") // Copy
             {
-                if (selectedButton != null & (s != null || usb != null))
+                if (selectedButton != null & (s != null))
                 {
                     CopyItem(selectedButton);
                 }
@@ -2568,7 +2566,7 @@ namespace ACNHPokerCore
                 int c = 0;
                 int timeNeeded = 3;
 
-                while (Utilities.IsAboutToSave(s, usb, timeNeeded, saveTime, ignore))
+                while (Utilities.IsAboutToSave(s, timeNeeded, saveTime, ignore))
                 {
                     if (c > timeNeeded + 5)
                     {
@@ -2599,10 +2597,10 @@ namespace ACNHPokerCore
 
                 if (coreOnly)
                 {
-                    Utilities.DropCore(s, usb, address, itemID, itemData, flag0, flag1);
+                    Utilities.DropCore(s, address, itemID, itemData, flag0, flag1);
                 }
                 else
-                    Utilities.DropItem(s, usb, address, itemID, itemData, flag0, flag1);
+                    Utilities.DropItem(s, address, itemID, itemData, flag0, flag1);
             }
 
             UpdateUI(() =>
@@ -2854,7 +2852,7 @@ namespace ACNHPokerCore
                     int c = 0;
                     int timeNeeded = time + 5;
 
-                    while (Utilities.IsAboutToSave(s, usb, timeNeeded, saveTime, ignore))
+                    while (Utilities.IsAboutToSave(s, timeNeeded, saveTime, ignore))
                     {
                         if (c > timeNeeded + 5)
                         {
@@ -2889,7 +2887,7 @@ namespace ACNHPokerCore
                     {
                         UInt32 currentColumn = (UInt32)(address + (0xC00 * (TopLeftX + i + 16)) + (0x10 * (TopLeftY)));
 
-                        Utilities.DropColumn(s, usb, currentColumn, currentColumn + 0x600, SpawnArea[i * 2], SpawnArea[i * 2 + 1], ref counter);
+                        Utilities.DropColumn(s, currentColumn, currentColumn + 0x600, SpawnArea[i * 2], SpawnArea[i * 2 + 1], ref counter);
                     }
 
                 }
@@ -3178,7 +3176,7 @@ namespace ACNHPokerCore
                 int c = 0;
                 int timeNeeded = time + 5;
 
-                while (Utilities.IsAboutToSave(s, usb, timeNeeded, saveTime, ignore))
+                while (Utilities.IsAboutToSave(s, timeNeeded, saveTime, ignore))
                 {
                     if (c > timeNeeded + 5)
                     {
@@ -3218,7 +3216,7 @@ namespace ACNHPokerCore
                         CurAddress += Utilities.NewMapSize;
                     }
 
-                    Utilities.DropColumn(s, usb, CurAddress, CurAddress + 0x600, SavedArea[i * 2], SavedArea[i * 2 + 1], ref counter);
+                    Utilities.DropColumn(s, CurAddress, CurAddress + 0x600, SavedArea[i * 2], SavedArea[i * 2 + 1], ref counter);
                 }
 
                 UpdateUI(() =>
@@ -3481,7 +3479,7 @@ namespace ACNHPokerCore
             int c = 0;
             int timeNeeded = 3;
 
-            while (Utilities.IsAboutToSave(s, usb, timeNeeded, saveTime, ignore))
+            while (Utilities.IsAboutToSave(s, timeNeeded, saveTime, ignore))
             {
                 if (c > timeNeeded + 5)
                 {
@@ -3510,7 +3508,7 @@ namespace ACNHPokerCore
                 Thread.Sleep(1000);
             }
 
-            Utilities.DeleteFloorItem(s, usb, address);
+            Utilities.DeleteFloorItem(s, address);
 
             UpdateUI(() =>
             {
@@ -3720,16 +3718,16 @@ namespace ACNHPokerCore
 
             try
             {
-                Layer1 = Utilities.GetMapLayer(s, usb, layer1Address, ref counter);
-                Layer2 = Utilities.GetMapLayer(s, usb, layer2Address, ref counter);
+                Layer1 = Utilities.GetMapLayer(s, layer1Address, ref counter);
+                Layer2 = Utilities.GetMapLayer(s, layer2Address, ref counter);
 
                 if (layer1Btn.Checked)
                     miniMapBox.BackgroundImage = miniMap.RefreshItemMap(Layer1);
                 else
                     miniMapBox.BackgroundImage = miniMap.RefreshItemMap(Layer2);
 
-                ActivateLayer1 = Utilities.GetActivate(s, usb, Utilities.mapActivate, ref counter);
-                ActivateLayer2 = Utilities.GetActivate(s, usb, Utilities.mapActivate + Utilities.mapActivateSize, ref counter);
+                ActivateLayer1 = Utilities.GetActivate(s, Utilities.mapActivate, ref counter);
+                ActivateLayer2 = Utilities.GetActivate(s, Utilities.mapActivate + Utilities.mapActivateSize, ref counter);
 
                 if (Layer1 != null && Layer2 != null && Acre != null)
                 {
@@ -3820,7 +3818,7 @@ namespace ACNHPokerCore
 
                     int c = 0;
                     int timeNeeded = 10;
-                    while (Utilities.IsAboutToSave(s, usb, timeNeeded, saveTime, ignore))
+                    while (Utilities.IsAboutToSave(s, timeNeeded, saveTime, ignore))
                     {
                         if (c > timeNeeded + 5)
                         {
@@ -3851,13 +3849,13 @@ namespace ACNHPokerCore
 
                     counter = 0;
 
-                    Utilities.DropColumn(s, usb, address1, address1 + 0x600, b[0], b[1], ref counter);
-                    Utilities.DropColumn(s, usb, address2, address2 + 0x600, b[2], b[3], ref counter);
-                    Utilities.DropColumn(s, usb, address3, address3 + 0x600, b[4], b[5], ref counter);
-                    Utilities.DropColumn(s, usb, address4, address4 + 0x600, b[6], b[7], ref counter);
-                    Utilities.DropColumn(s, usb, address5, address5 + 0x600, b[8], b[9], ref counter);
-                    Utilities.DropColumn(s, usb, address6, address6 + 0x600, b[10], b[11], ref counter);
-                    Utilities.DropColumn(s, usb, address7, address7 + 0x600, b[12], b[13], ref counter);
+                    Utilities.DropColumn(s, address1, address1 + 0x600, b[0], b[1], ref counter);
+                    Utilities.DropColumn(s, address2, address2 + 0x600, b[2], b[3], ref counter);
+                    Utilities.DropColumn(s, address3, address3 + 0x600, b[4], b[5], ref counter);
+                    Utilities.DropColumn(s, address4, address4 + 0x600, b[6], b[7], ref counter);
+                    Utilities.DropColumn(s, address5, address5 + 0x600, b[8], b[9], ref counter);
+                    Utilities.DropColumn(s, address6, address6 + 0x600, b[10], b[11], ref counter);
+                    Utilities.DropColumn(s, address7, address7 + 0x600, b[12], b[13], ref counter);
                 }
 
 
@@ -3953,7 +3951,7 @@ namespace ACNHPokerCore
                     else
                         address = GetAddress(anchorX - 3, anchorY - 3) + Utilities.NewMapSize;
 
-                    byte[] readFloor = Utilities.Read7x7Floor(s, usb, address);
+                    byte[] readFloor = Utilities.Read7x7Floor(s, address);
                     byte[] curFloor = new byte[1568];
 
                     Buffer.BlockCopy(readFloor, 0x0, curFloor, 0x0, 0x70);
@@ -4010,7 +4008,7 @@ namespace ACNHPokerCore
 
                     int c = 0;
                     int timeNeeded = 10;
-                    while (Utilities.IsAboutToSave(s, usb, timeNeeded, saveTime, ignore))
+                    while (Utilities.IsAboutToSave(s, timeNeeded, saveTime, ignore))
                     {
                         if (c > timeNeeded + 5)
                         {
@@ -4041,13 +4039,13 @@ namespace ACNHPokerCore
 
                     counter = 0;
 
-                    Utilities.DropColumn(s, usb, address1, address1 + 0x600, b[0], b[1], ref counter);
-                    Utilities.DropColumn(s, usb, address2, address2 + 0x600, b[2], b[3], ref counter);
-                    Utilities.DropColumn(s, usb, address3, address3 + 0x600, b[4], b[5], ref counter);
-                    Utilities.DropColumn(s, usb, address4, address4 + 0x600, b[6], b[7], ref counter);
-                    Utilities.DropColumn(s, usb, address5, address5 + 0x600, b[8], b[9], ref counter);
-                    Utilities.DropColumn(s, usb, address6, address6 + 0x600, b[10], b[11], ref counter);
-                    Utilities.DropColumn(s, usb, address7, address7 + 0x600, b[12], b[13], ref counter);
+                    Utilities.DropColumn(s, address1, address1 + 0x600, b[0], b[1], ref counter);
+                    Utilities.DropColumn(s, address2, address2 + 0x600, b[2], b[3], ref counter);
+                    Utilities.DropColumn(s, address3, address3 + 0x600, b[4], b[5], ref counter);
+                    Utilities.DropColumn(s, address4, address4 + 0x600, b[6], b[7], ref counter);
+                    Utilities.DropColumn(s, address5, address5 + 0x600, b[8], b[9], ref counter);
+                    Utilities.DropColumn(s, address6, address6 + 0x600, b[10], b[11], ref counter);
+                    Utilities.DropColumn(s, address7, address7 + 0x600, b[12], b[13], ref counter);
                 }
 
                 UpdateUI(() =>
@@ -4124,7 +4122,7 @@ namespace ACNHPokerCore
                 else
                     address = GetAddress(anchorX - 3, anchorY - 3) + Utilities.NewMapSize;
 
-                byte[] b = Utilities.Read7x7Floor(s, usb, address);
+                byte[] b = Utilities.Read7x7Floor(s, address);
                 byte[] save = new byte[1568];
 
                 Buffer.BlockCopy(b, 0x0, save, 0x0, 0x70);
@@ -4269,7 +4267,7 @@ namespace ACNHPokerCore
                         else
                             address = GetAddress(anchorX - 3, anchorY - 3) + Utilities.NewMapSize;
 
-                        byte[] readFloor = Utilities.Read7x7Floor(s, usb, address);
+                        byte[] readFloor = Utilities.Read7x7Floor(s, address);
                         curFloor = new byte[1568];
 
                         Buffer.BlockCopy(readFloor, 0x0, curFloor, 0x0, 0x70);
@@ -4372,13 +4370,13 @@ namespace ACNHPokerCore
 
                     List<Task> tasks =
                     [
-                        Task.Run(() => Utilities.DropColumn(s, usb, address1, address1 + 0x600, b[0], b[1])),
-                        Task.Run(() => Utilities.DropColumn(s, usb, address2, address2 + 0x600, b[2], b[3])),
-                        Task.Run(() => Utilities.DropColumn(s, usb, address3, address3 + 0x600, b[4], b[5])),
-                        Task.Run(() => Utilities.DropColumn(s, usb, address4, address4 + 0x600, b[6], b[7])),
-                        Task.Run(() => Utilities.DropColumn(s, usb, address5, address5 + 0x600, b[8], b[9])),
-                        Task.Run(() => Utilities.DropColumn(s, usb, address6, address6 + 0x600, b[10], b[11])),
-                        Task.Run(() => Utilities.DropColumn(s, usb, address7, address7 + 0x600, b[12], b[13]))
+                        Task.Run(() => Utilities.DropColumn(s, address1, address1 + 0x600, b[0], b[1])),
+                        Task.Run(() => Utilities.DropColumn(s, address2, address2 + 0x600, b[2], b[3])),
+                        Task.Run(() => Utilities.DropColumn(s, address3, address3 + 0x600, b[4], b[5])),
+                        Task.Run(() => Utilities.DropColumn(s, address4, address4 + 0x600, b[6], b[7])),
+                        Task.Run(() => Utilities.DropColumn(s, address5, address5 + 0x600, b[8], b[9])),
+                        Task.Run(() => Utilities.DropColumn(s, address6, address6 + 0x600, b[10], b[11])),
+                        Task.Run(() => Utilities.DropColumn(s, address7, address7 + 0x600, b[12], b[13]))
                     ];
 
                     await Task.WhenAll(tasks);
@@ -5215,7 +5213,7 @@ namespace ACNHPokerCore
             try
             {
 
-                byte[] Coordinate = Utilities.GetCoordinate(s, usb);
+                byte[] Coordinate = Utilities.GetCoordinate(s);
                 int x = BitConverter.ToInt32(Coordinate, 0);
                 int y = BitConverter.ToInt32(Coordinate, 4);
 
@@ -5261,9 +5259,9 @@ namespace ACNHPokerCore
             if (bulkSpawn == null)
             {
                 if (layer1Btn.Checked)
-                    bulkSpawn = new BulkSpawn(s, usb, Layer1, Layer2, Acre, Building, Terrain, MapCustomDesgin, anchorX, anchorY, ignore, sound, debugging, true);
+                    bulkSpawn = new BulkSpawn(s, Layer1, Layer2, Acre, Building, Terrain, MapCustomDesgin, anchorX, anchorY, ignore, sound, debugging, true);
                 else
-                    bulkSpawn = new BulkSpawn(s, usb, Layer1, Layer2, Acre, Building, Terrain, MapCustomDesgin, anchorX, anchorY, ignore, sound, debugging, false);
+                    bulkSpawn = new BulkSpawn(s, Layer1, Layer2, Acre, Building, Terrain, MapCustomDesgin, anchorX, anchorY, ignore, sound, debugging, false);
             }
             bulkSpawn.StartPosition = FormStartPosition.CenterParent;
             bulkSpawn.SetOwner(this);
@@ -5708,7 +5706,7 @@ namespace ACNHPokerCore
                 {
                     int c = 0;
                     int timeNeeded = num + 10;
-                    while (Utilities.IsAboutToSave(s, usb, timeNeeded, saveTime, ignore))
+                    while (Utilities.IsAboutToSave(s, timeNeeded, saveTime, ignore))
                     {
                         if (c > timeNeeded + 5)
                         {
@@ -5745,7 +5743,7 @@ namespace ACNHPokerCore
                         {
                             byte[] column = new byte[0x1800];
                             Buffer.BlockCopy(newLayer, i * 0x1800, column, 0, 0x1800);
-                            Utilities.DropRenewColumn(s, usb, (uint)(Utilities.mapZero + (i * 0x1800)), column, ref counter);
+                            Utilities.DropRenewColumn(s, (uint)(Utilities.mapZero + (i * 0x1800)), column, ref counter);
                         }
                     }
                 }
@@ -5791,7 +5789,7 @@ namespace ACNHPokerCore
                 {
                     int c = 0;
                     int timeNeeded = num + 10;
-                    while (Utilities.IsAboutToSave(s, usb, timeNeeded, saveTime, ignore))
+                    while (Utilities.IsAboutToSave(s, timeNeeded, saveTime, ignore))
                     {
                         if (c > timeNeeded + 5)
                         {
@@ -5829,7 +5827,7 @@ namespace ACNHPokerCore
                     {
                         byte[] column = new byte[0x1800];
                         Buffer.BlockCopy(newLayer, i * 0x1800, column, 0, 0x1800);
-                        Utilities.DropRenewColumn(s, usb, (uint)(address + (i * 0x1800)), column, ref counter);
+                        Utilities.DropRenewColumn(s, (uint)(address + (i * 0x1800)), column, ref counter);
                     }
                 }
 
@@ -5873,7 +5871,7 @@ namespace ACNHPokerCore
         {
             try
             {
-                byte[] b = Utilities.GetSaving(s, usb) ?? throw new NullReferenceException("Save");
+                byte[] b = Utilities.GetSaving(s) ?? throw new NullReferenceException("Save");
                 byte[] currentFrame = new byte[4];
                 byte[] lastFrame = new byte[4];
                 Buffer.BlockCopy(b, 12, currentFrame, 0, 4);
@@ -6099,7 +6097,7 @@ namespace ACNHPokerCore
 
                     UInt32 currentColumn = (UInt32)(address + (0xC00 * (anchorX - 3 + 16)) + (0x10 * (anchorY - 3)));
 
-                    byte[] readFloor = Utilities.Read7x7Floor(s, usb, currentColumn);
+                    byte[] readFloor = Utilities.Read7x7Floor(s, currentColumn);
                     byte[] curFloor = new byte[1568];
 
                     Buffer.BlockCopy(readFloor, 0x0, curFloor, 0x0, 0x70);
@@ -6152,7 +6150,7 @@ namespace ACNHPokerCore
 
                     int c = 0;
                     int timeNeeded = 10;
-                    while (Utilities.IsAboutToSave(s, usb, timeNeeded, saveTime, ignore))
+                    while (Utilities.IsAboutToSave(s, timeNeeded, saveTime, ignore))
                     {
                         if (c > timeNeeded + 5)
                         {
@@ -6185,13 +6183,13 @@ namespace ACNHPokerCore
 
                     List<Task> tasks =
                     [
-                        Task.Run(() => Utilities.DropColumn(s, usb, address1, address1 + 0x600, b[0], b[1])),
-                        Task.Run(() => Utilities.DropColumn(s, usb, address2, address2 + 0x600, b[2], b[3])),
-                        Task.Run(() => Utilities.DropColumn(s, usb, address3, address3 + 0x600, b[4], b[5])),
-                        Task.Run(() => Utilities.DropColumn(s, usb, address4, address4 + 0x600, b[6], b[7])),
-                        Task.Run(() => Utilities.DropColumn(s, usb, address5, address5 + 0x600, b[8], b[9])),
-                        Task.Run(() => Utilities.DropColumn(s, usb, address6, address6 + 0x600, b[10], b[11])),
-                        Task.Run(() => Utilities.DropColumn(s, usb, address7, address7 + 0x600, b[12], b[13]))
+                        Task.Run(() => Utilities.DropColumn(s, address1, address1 + 0x600, b[0], b[1])),
+                        Task.Run(() => Utilities.DropColumn(s, address2, address2 + 0x600, b[2], b[3])),
+                        Task.Run(() => Utilities.DropColumn(s, address3, address3 + 0x600, b[4], b[5])),
+                        Task.Run(() => Utilities.DropColumn(s, address4, address4 + 0x600, b[6], b[7])),
+                        Task.Run(() => Utilities.DropColumn(s, address5, address5 + 0x600, b[8], b[9])),
+                        Task.Run(() => Utilities.DropColumn(s, address6, address6 + 0x600, b[10], b[11])),
+                        Task.Run(() => Utilities.DropColumn(s, address7, address7 + 0x600, b[12], b[13]))
                     ];
 
                     await Task.WhenAll(tasks);
@@ -7708,7 +7706,7 @@ namespace ACNHPokerCore
 
             int c = 0;
             int timeNeeded = 3;
-            while (Utilities.IsAboutToSave(s, usb, timeNeeded, saveTime, ignore))
+            while (Utilities.IsAboutToSave(s, timeNeeded, saveTime, ignore))
             {
                 if (c > timeNeeded + 5)
                 {
@@ -7770,7 +7768,7 @@ namespace ACNHPokerCore
 
             int c = 0;
             int timeNeeded = 3;
-            while (Utilities.IsAboutToSave(s, usb, timeNeeded, saveTime, ignore))
+            while (Utilities.IsAboutToSave(s, timeNeeded, saveTime, ignore))
             {
                 if (c > timeNeeded + 5)
                 {
@@ -7799,10 +7797,10 @@ namespace ACNHPokerCore
                 Thread.Sleep(1000);
             }
 
-            Utilities.PokeAddress(s, usb, Address1.ToString("X"), value.ToString("X"));
-            Utilities.PokeAddress(s, usb, (Address1 + 0x1C).ToString("X"), value.ToString("X"));
-            Utilities.PokeAddress(s, usb, Address2.ToString("X"), value.ToString("X"));
-            Utilities.PokeAddress(s, usb, (Address2 + 0x1C).ToString("X"), value.ToString("X"));
+            Utilities.PokeAddress(s, Address1.ToString("X"), value.ToString("X"));
+            Utilities.PokeAddress(s, (Address1 + 0x1C).ToString("X"), value.ToString("X"));
+            Utilities.PokeAddress(s, Address2.ToString("X"), value.ToString("X"));
+            Utilities.PokeAddress(s, (Address2 + 0x1C).ToString("X"), value.ToString("X"));
 
             UpdateUI(() =>
             {

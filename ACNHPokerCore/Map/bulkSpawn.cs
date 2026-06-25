@@ -12,7 +12,6 @@ namespace ACNHPokerCore
     public partial class BulkSpawn : Form
     {
         private readonly Socket s;
-        private readonly USBBot bot;
         private Map MainMap;
         private int counter;
         private int anchorX = -1;
@@ -32,12 +31,11 @@ namespace ACNHPokerCore
         private byte[][] SpawnArea;
         private bool spawnlock;
         private readonly bool debugging;
-        public BulkSpawn(Socket S, USBBot Bot, byte[] layer1, byte[] layer2, byte[] acre, byte[] building, byte[] terrain, byte[] design, int x, int y, bool Ignore, bool Sound, bool Debugging, bool Layer1Selected)
+        public BulkSpawn(Socket S, byte[] layer1, byte[] layer2, byte[] acre, byte[] building, byte[] terrain, byte[] design, int x, int y, bool Ignore, bool Sound, bool Debugging, bool Layer1Selected)
         {
             try
             {
                 s = S;
-                bot = Bot;
                 anchorX = x;
                 anchorY = y;
                 ignore = Ignore;
@@ -356,7 +354,7 @@ namespace ACNHPokerCore
                     int c = 0;
                     int timeNeeded = time + 10;
 
-                    while (Utilities.IsAboutToSave(s, bot, timeNeeded, 0, ignore))
+                    while (Utilities.IsAboutToSave(s, timeNeeded, 0, ignore))
                     {
                         if (c > timeNeeded + 5)
                         {
@@ -401,7 +399,7 @@ namespace ACNHPokerCore
                         {
                             UInt32 address = (UInt32)(SpawnAddress + (0xC00 * (anchorX + i + 16)) + (0x10 * (anchorY)));
 
-                            Utilities.DropColumn(s, bot, address, address + 0x600, SpawnArea[i * 2], SpawnArea[i * 2 + 1], ref counter);
+                            Utilities.DropColumn(s, address, address + 0x600, SpawnArea[i * 2], SpawnArea[i * 2 + 1], ref counter);
                         }
                     }
 
@@ -418,7 +416,7 @@ namespace ACNHPokerCore
                         {
                             UInt32 address = (UInt32)(SpawnAddress + (0xC00 * (anchorX - i + 16)) + (0x10 * (anchorY)));
 
-                            Utilities.DropColumn(s, bot, address, address + 0x600, SpawnArea[i * 2], SpawnArea[i * 2 + 1], ref counter);
+                            Utilities.DropColumn(s, address, address + 0x600, SpawnArea[i * 2], SpawnArea[i * 2 + 1], ref counter);
                         }
                     }
 

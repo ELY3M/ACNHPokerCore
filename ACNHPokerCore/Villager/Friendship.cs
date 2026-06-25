@@ -9,15 +9,13 @@ namespace ACNHPokerCore
     {
         readonly int[] friendshipValue = new int[8];
         readonly Socket S;
-        readonly USBBot USB;
         readonly int Index;
         readonly bool sound;
         readonly Villager V;
-        public Friendship(int i, Socket s, USBBot usb, Image img, Villager v, bool Sound)
+        public Friendship(int i, Socket s, Image img, Villager v, bool Sound)
         {
             InitializeComponent();
             S = s;
-            USB = usb;
             Index = i;
             V = v;
             sound = Sound;
@@ -28,7 +26,7 @@ namespace ACNHPokerCore
             for (int p = 0; p < 8; p++)
             {
                 //byte[] b = Utilities.GetVillager(s, bot, i, (int)(Utilities.VillagerMemoryTinySize), ref counter);
-                byte[] b = Utilities.GetPlayerDataVillager(S, USB, i, p, (int)(Utilities.VillagerMemoryTinySize));
+                byte[] b = Utilities.GetPlayerDataVillager(S, i, p, (int)(Utilities.VillagerMemoryTinySize));
                 if (b == null)
                     break;
                 friendshipValue[p] = b[70];
@@ -242,7 +240,7 @@ namespace ACNHPokerCore
             {
                 if (SetValue[p] != friendshipValue[p])
                 {
-                    Utilities.SetFriendship(S, USB, Index, p, SetValue[p].ToString("X"));
+                    Utilities.SetFriendship(S, Index, p, SetValue[p].ToString("X"));
                     V.Friendship[p] = (byte)SetValue[p];
                 }
             }

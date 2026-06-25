@@ -86,6 +86,11 @@
 	* Added Incoming Visitor captures  
 	* Added option to do auto max bells in dodo function.
 	* Added Empty villager house in the villager replacer
+	* removed Twitch and Discord - I never used them.  
+	* removed libusb and USB stuff - I never used them.       
+	
+	* the goal is get this app to work in Linux and android - I needed to remove the stupid windows-only dependencies.     
+	
 	
 ## Donate
 
