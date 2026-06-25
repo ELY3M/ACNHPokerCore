@@ -98,11 +98,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DiscordWebhook\DiscordWebhook.csproj" />
-    <ProjectReference Include="..\Twitch\Twitch.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="App.config">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>

@@ -10,7 +10,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Twitch;
 using static ACNHPokerCore.Teleport;
 
 namespace ACNHPokerCore
@@ -22,8 +21,6 @@ namespace ACNHPokerCore
         private bool idleEmote;
         private int idleNum;
         private bool HoldingL;
-        private PubSub MyPubSub;
-        private TwitchBot MyTwitchBot;
         private string TwitchBotUserName;
         private string TwitchBotOauth;
         private string TwitchChannelName;
@@ -526,15 +523,6 @@ namespace ACNHPokerCore
 
             controllerTimer.Stop();
 
-            if (MyPubSub != null)
-            {
-                MyPubSub.Dispose();
-                MyPubSub = null;
-            }
-            if (MyTwitchBot != null)
-            {
-                MyTwitchBot = null;
-            }
             if (itemDisplay != null)
             {
                 itemDisplay.Close();
@@ -754,53 +742,7 @@ namespace ACNHPokerCore
                     UpdateTurnipPriceHandler?.Invoke();
                 }
 
-                if (MyPubSub != null)
-                {
-                    if (dropItem)
-                    {
-                        if (idleNum >= 2)
-                        {
-                            if (wasLoading)
-                            {
-                                if (Utilities.HasItemInFirstSlot(s))
-                                {
-                                    if (lastOrderIsRecipe)
-                                        Controller.DropRecipe();
-                                    else
-                                        Controller.DropItem();
-                                }
 
-                                wasLoading = false;
-                            }
-
-                            if (PubSub.DropOrderList.Count <= 0)
-                            {
-                                Debug.Print("No Item Drop Order");
-                            }
-                            else
-                            {
-                                _ = DropItem(PubSub.DropOrderList.ElementAt(0));
-                                if (PubSub.DropOrderList.Count > 0)
-                                    state = Teleport.OverworldState.ItemDropping;
-                            }
-                        }
-
-                        if (PubSub.DropOrderList.Count > 0)
-                            state = Teleport.OverworldState.ItemDropping;
-                    }
-
-                    if (injectVillager)
-                    {
-                        if (PubSub.VillagerOrderList.Count <= 0)
-                        {
-                            Debug.Print("No Villager Order");
-                        }
-                        else if (state != Teleport.OverworldState.ItemDropping && idleNum >= 2)
-                        {
-                            _ = InjectVillager(PubSub.VillagerOrderList.ElementAt(0));
-                        }
-                    }
-                }
 
                 if (idleEmote && state == Teleport.OverworldState.OverworldOrInAirport)
                 {
@@ -1046,121 +988,7 @@ namespace ACNHPokerCore
             Thread.Sleep(10000);
         }
 
-        private async Task DropItem(ItemOrder CurrentOrder)
-        {
-            string flag0;
-            if (CurrentOrder.Id == "16A2" || CurrentOrder.Name.Contains("wrapping paper") || CurrentOrder.Id == "3107" || CurrentOrder.Id == "3106") // Vine Glowing Moss
-                flag0 = "00";
-            else
-                flag0 = "7F";
 
-            string flag1 = "00";
-
-            if (itemDisplay != null)
-            {
-                string path = Main.GetImagePathFromID(CurrentOrder.Id, Convert.ToUInt32("0x" + Utilities.PrecedingZeros(CurrentOrder.Count, 8), 16));
-                if (File.Exists(path))
-                {
-                    Image image = ImageCacher.GetImage(path);
-                    itemDisplay.SetItemdisplay(image);
-                }
-            }
-
-            Utilities.SpawnItem(s, null, 0, flag0 + flag1 + CurrentOrder.Id, Utilities.PrecedingZeros(CurrentOrder.Count, 8));
-            //Thread.Sleep(500);
-            if (CurrentOrder.Id == "16A2" || CurrentOrder.Id == "3107" || CurrentOrder.Id == "3106")
-            {
-                Controller.DropRecipe();
-                lastOrderIsRecipe = true;
-            }
-            else
-            {
-                Controller.DropItem();
-                lastOrderIsRecipe = false;
-            }
-            if (!CurrentOrder.Color.Equals(string.Empty))
-                await MyTwitchBot.SendMessage($"{CurrentOrder.Owner}, your order of \"{CurrentOrder.Name}\" ({CurrentOrder.Color}) have been dropped.");
-            else
-                await MyTwitchBot.SendMessage($"{CurrentOrder.Owner}, your order of \"{CurrentOrder.Name}\" have been dropped.");
-
-            //await MyTwitchBot.SendMessage($"If you can't find your order, people flying in/out might have canceled it. We are very sorry. Feel free to place your order again.");
-
-            PubSub.DropOrderList.RemoveAt(0);
-        }
-
-        private async Task InjectVillager(VillagerOrder CurrentOrder)
-        {
-            List<string> VillagerList = Utilities.GetVillagerList(s);
-
-            if (VillagerList.Contains(CurrentOrder.InternalName))
-            {
-                int i = VillagerList.IndexOf(CurrentOrder.InternalName);
-
-                Utilities.SetMoveout(s, null, i, "2", "0");
-
-                await MyTwitchBot.SendMessage($"{CurrentOrder.Owner}, \"{CurrentOrder.RealName}\" is already waiting for you on the island.");
-
-                PubSub.VillagerOrderList.RemoveAt(0);
-
-                //MapRegenerator.updateVillager(s, i);
-            }
-            else
-            {
-                int houseIndex = 9;
-                int villagerIndex = Convert.ToInt32(Utilities.GetHouseOwner(s, null, houseIndex));
-
-                string IVpath = Utilities.villagerPath + CurrentOrder.InternalName + ".nhv2";
-                string RVpath = Utilities.villagerPath + CurrentOrder.RealName + ".nhv2";
-
-                byte[] villagerData;
-                byte[] houseData;
-
-                if (File.Exists(IVpath))
-                    villagerData = File.ReadAllBytes(IVpath);
-                else if (File.Exists(RVpath))
-                    villagerData = File.ReadAllBytes(RVpath);
-                else
-                {
-                    WriteLog("Villager files \"" + CurrentOrder.InternalName + ".nhv2\" " + "/ \"" + CurrentOrder.RealName + ".nhv2\" " + "not found!", true);
-                    PubSub.VillagerOrderList.RemoveAt(0);
-                    return;
-                }
-
-                string IHpath = Utilities.villagerPath + CurrentOrder.InternalName + ".nhvh2";
-                string RHpath = Utilities.villagerPath + CurrentOrder.RealName + ".nhvh2";
-                if (File.Exists(IHpath))
-                    houseData = File.ReadAllBytes(IHpath);
-                else if (File.Exists(RHpath))
-                    houseData = File.ReadAllBytes(RHpath);
-                else
-                {
-                    WriteLog("Villager house files \"" + CurrentOrder.InternalName + ".nhvh2\" " + "/ \"" + CurrentOrder.RealName + ".nhvh2\" " + "not found!", true);
-                    PubSub.VillagerOrderList.RemoveAt(0);
-                    return;
-                }
-
-                WriteLog($"Loading villager... \"{CurrentOrder.RealName}\"", true);
-
-                byte[] modifiedVillager = villagerData;
-                Buffer.BlockCopy(Main.GetHeader(), 0x0, modifiedVillager, 0x4, 52);
-
-                byte[] modifiedHouse = houseData;
-
-                byte h = (byte)villagerIndex;
-                modifiedHouse[Utilities.VillagerHouseOwnerOffset] = h;
-
-                await Utilities.LoadBoth(s, villagerIndex, villagerData, houseIndex, houseData);
-                await Utilities.SetMoveout(s, villagerIndex, "2", "0");
-
-                await MyTwitchBot.SendMessage($"{CurrentOrder.Owner}, \"{CurrentOrder.RealName}\" is now waiting for you on the island.");
-
-                PubSub.VillagerOrderList.RemoveAt(0);
-
-                //MapRegenerator.updateVillager(s, villagerIndex);
-                WriteLog($"Villager \"{CurrentOrder.RealName}\" loaded!", true);
-            }
-
-        }
 
         private void DodoLog_TextChanged(object sender, EventArgs e)
         {
@@ -1453,40 +1281,7 @@ namespace ACNHPokerCore
             lastOrderIsRecipe = false;
         }
 
-        private async void TwitchBtn_Click(object sender, EventArgs e)
-        {
-            TwitchBotUserName = Utilities.GetJsonSetting(Utilities.TwitchSettingPath, "TwitchBotUserName");
-            TwitchBotOauth = Utilities.GetJsonSetting(Utilities.TwitchSettingPath, "TwitchBotOauth");
-            TwitchChannelName = Utilities.GetJsonSetting(Utilities.TwitchSettingPath, "TwitchChannelName");
-            TwitchChannelAccessToken = Utilities.GetJsonSetting(Utilities.TwitchSettingPath, "TwitchChannelAccessToken");
 
-            if (TwitchBotUserName.Equals(string.Empty) || TwitchBotOauth.Equals(string.Empty) || TwitchChannelName.Equals(string.Empty) || TwitchChannelAccessToken.Equals(string.Empty))
-            {
-                MyMessageBox.Show("Invalid Twitch setting!", "Error Code: 2124-4007", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            TwitchChannelid = await Utilities.GetChannelId(TwitchChannelName);
-
-            if (TwitchChannelid.Equals(string.Empty))
-            {
-                MyMessageBox.Show("Unable to retrieve your channel ID!", "Error Code: 2181-4008", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            TwitchBtn.Enabled = false;
-            itemDisplayBtn.Enabled = true;
-            WriteLog("--------------------------------------------------------------------------------------------");
-            MyTwitchBot = new TwitchBot(TwitchBotUserName, TwitchBotOauth, TwitchChannelName);
-            WriteLog($"Your chat bot name is {TwitchBotUserName}", true);
-            WriteLog($"Your channel name is {TwitchChannelName}", true);
-            WriteLog($"Check your Twitch chat for the start up message!", true);
-
-            MyPubSub = new PubSub(MyTwitchBot, TwitchChannelid, TwitchChannelAccessToken, ref dodoLog);
-            WriteLog($"Your channel ID is {TwitchChannelid}", true);
-            WriteLog("--------------------------------------------------------------------------------------------");
-            WriteLog($"Redeem a \"Custom Rewards\" on Twitch to get the Reward IDs!", true);
-        }
 
         private void ItemDisplayBtn_Click(object sender, EventArgs e)
         {
@@ -1718,48 +1513,7 @@ namespace ACNHPokerCore
 
                 if (state != Teleport.OverworldState.Loading && state != Teleport.OverworldState.UserArriveLeavingOrTitleScreen)
                 {
-                    if (MyPubSub != null)
-                    {
-                        if (dropItem)
-                        {
-                            if (idleNum >= 2)
-                            {
-                                if (wasLoading)
-                                {
-                                    if (Utilities.HasItemInFirstSlot(s))
-                                    {
-                                        if (lastOrderIsRecipe)
-                                            Controller.DropRecipe();
-                                        else
-                                            Controller.DropItem();
-                                    }
-                                    wasLoading = false;
-                                }
 
-                                if (PubSub.DropOrderList.Count <= 0)
-                                    Debug.Print("No Item Drop Order");
-                                else
-                                {
-                                    _ = DropItem(PubSub.DropOrderList.ElementAt(0));
-                                    if (PubSub.DropOrderList.Count > 0)
-                                        state = Teleport.OverworldState.ItemDropping;
-                                }
-                            }
-
-                            if (PubSub.DropOrderList.Count > 0)
-                                state = Teleport.OverworldState.ItemDropping;
-                        }
-
-                        if (injectVillager)
-                        {
-                            if (PubSub.VillagerOrderList.Count <= 0)
-                                Debug.Print("No Villager Order");
-                            else if (state != Teleport.OverworldState.ItemDropping && idleNum >= 2)
-                            {
-                                _ = InjectVillager(PubSub.VillagerOrderList.ElementAt(0));
-                            }
-                        }
-                    }
 
                     if (idleEmote && state == Teleport.OverworldState.OverworldOrInAirport)
                     {

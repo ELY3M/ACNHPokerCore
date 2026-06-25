@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+﻿
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -4030,59 +4030,6 @@ namespace ACNHPokerCore
             }
         }
 
-        public static string GetJsonSetting(string path, string key)
-        {
-            JObject o = JObject.Parse(File.ReadAllText(path));
-            var value = o.SelectToken(key);
-            if (value == null)
-                return string.Empty;
-            else
-                return value.ToString();
-        }
-
-        public async static Task<string> GetChannelId(string channelName)
-        {
-            string client_id = "py5rhko7jo3f00ypq83he8oomz0adu";
-            string client_secret = "d0685tl6iniqgszzpr4gdszhey27m1";
-            string grant_type = "client_credentials";
-            string scope = "user:read:email";
-
-            string URL = "https://id.twitch.tv/oauth2/token?client_id=" + client_id +
-                                                                        "&client_secret=" + client_secret +
-                                                                        "&grant_type=" + grant_type +
-                                                                        "&scope=" + scope;
-            HttpClient client = new();
-            var pairs = new List<KeyValuePair<string, string>> { };
-            var content = new FormUrlEncodedContent(pairs);
-            using HttpResponseMessage response = await client.PostAsync(URL, content);
-            string OAuthTarget = await response.Content.ReadAsStringAsync();
-
-            JObject o = JObject.Parse(OAuthTarget);
-            var token = o.SelectToken("access_token");
-
-            if (token == null)
-                return string.Empty;
-
-            string access_token = token.ToString();
-
-            string URL2 = "https://api.twitch.tv/helix/users?login=" + channelName;
-
-            HttpClient client2 = new();
-
-            client2.DefaultRequestHeaders.Add("Authorization", "Bearer " + access_token);
-            client2.DefaultRequestHeaders.Add("Client-ID", "py5rhko7jo3f00ypq83he8oomz0adu");
-
-            using HttpResponseMessage response2 = await client2.GetAsync(URL2);
-            using HttpContent content2 = response2.Content;
-            string target = await content2.ReadAsStringAsync();
-
-            JObject DataObject = JObject.Parse(target);
-            var value = DataObject.SelectToken("data[0].id");
-            if (value == null)
-                return string.Empty;
-            else
-                return value.ToString();
-        }
 
         public static bool HasItemInFirstSlot(Socket socket, USBBot usb = null)
         {

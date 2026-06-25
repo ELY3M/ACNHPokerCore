@@ -1,5 +1,4 @@
-﻿using DiscordWebhook;
-using System;
+﻿using System;
 using System.Configuration;
 using System.Drawing;
 using System.IO;
@@ -598,62 +597,7 @@ namespace ACNHPokerCore
                     sw.WriteLine(dodo);
                 }
 
-                if (File.Exists(Utilities.webhookPath))
-                {
-                    string url;
-                    string content;
-                    string color;
-                    Color SideColor;
-                    string imageURL;
-                    using (StreamReader sr = new(Utilities.webhookPath))
-                    {
-                        url = sr.ReadLine();
-                        content = sr.ReadLine();
-                        color = sr.ReadLine();
-                        imageURL = sr.ReadLine();
-                    }
 
-                    if (content == null)
-                    {
-                        content = "";
-                    }
-                    if (color == null)
-                    {
-                        SideColor = Color.Pink;
-                    }
-                    else
-                    {
-                        SideColor = ColorTranslator.FromHtml(color);
-                    }
-                    if (imageURL == null)
-                    {
-                        imageURL = "";
-                    }
-
-                    DiscordWebhook.DiscordWebhook hook = new()
-                    {
-                        Uri = new Uri(url)
-                    };
-
-                    DiscordMessage msg = new()
-                    {
-                        Content = content,
-                        Embeds = []
-                    };
-                    msg.Embeds.Add(new DiscordEmbed()
-                    {
-                        Title = "New Dodo Code for " + IslandName + " :",
-                        Description = dodo,
-                        Timestamp = DateTime.Now,
-                        Color = SideColor, //alpha will be ignored, you can use any RGB color
-                        Thumbnail = new EmbedMedia() { Url = imageURL },
-                        Footer = new EmbedFooter() { Text = "Sent From ACNHPokerCore" }
-                    });
-
-                    //message.TTS = true; //read message to everyone on the channel
-
-                    _ = hook.SendAsync(msg);
-                }
 
                 return dodo;
             }
@@ -675,64 +619,8 @@ namespace ACNHPokerCore
                     sw.WriteLine(dodo);
                 }
 
-                if (File.Exists(Utilities.webhookPath))
-                {
-                    string url;
-                    string content;
-                    string color;
-                    Color SideColor;
-                    string imageURL;
-                    using (StreamReader sr = new(Utilities.webhookPath))
-                    {
-                        url = sr.ReadLine();
-                        content = sr.ReadLine();
-                        color = sr.ReadLine();
-                        imageURL = sr.ReadLine();
-                    }
+ 
 
-                    if (content == null)
-                    {
-                        content = "";
-                    }
-
-                    if (color == null)
-                    {
-                        SideColor = Color.Pink;
-                    }
-                    else
-                    {
-                        SideColor = ColorTranslator.FromHtml(color);
-                    }
-
-                    if (imageURL == null)
-                    {
-                        imageURL = "";
-                    }
-
-                    DiscordWebhook.DiscordWebhook hook = new()
-                    {
-                        Uri = new Uri(url)
-                    };
-
-                    DiscordMessage msg = new()
-                    {
-                        Content = content,
-                        Embeds = []
-                    };
-                    msg.Embeds.Add(new DiscordEmbed()
-                    {
-                        Title = "New Dodo Code for " + IslandName + " :",
-                        Description = dodo,
-                        Timestamp = DateTime.Now,
-                        Color = SideColor, //alpha will be ignored, you can use any RGB color
-                        Thumbnail = new EmbedMedia() { Url = imageURL },
-                        Footer = new EmbedFooter() { Text = "Sent From ACNHPokerCore" }
-                    });
-
-                    //message.TTS = true; //read message to everyone on the channel
-
-                    _ = hook.SendAsync(msg);
-                }
             }
             catch (Exception ex)
             {

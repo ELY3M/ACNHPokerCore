@@ -467,23 +467,6 @@ namespace ACNHPokerCore
             itemDisplayBtn.Visible = false;
             itemDisplayBtn.Click += ItemDisplayBtn_Click;
             // 
-            // TwitchBtn
-            // 
-            TwitchBtn.BackColor = System.Drawing.Color.FromArgb(100, 65, 164);
-            TwitchBtn.FlatAppearance.BorderSize = 0;
-            TwitchBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            TwitchBtn.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            TwitchBtn.ForeColor = System.Drawing.Color.White;
-            TwitchBtn.Location = new System.Drawing.Point(3, 1);
-            TwitchBtn.Margin = new System.Windows.Forms.Padding(4);
-            TwitchBtn.Name = "TwitchBtn";
-            TwitchBtn.Size = new System.Drawing.Size(112, 22);
-            TwitchBtn.TabIndex = 335;
-            TwitchBtn.Text = "Twitch";
-            HoverToolTip.SetToolTip(TwitchBtn, "Connect the chatbot and pubsub server.\r\nRequired if you want to use Twitch drop and villager inject.\r\n\r\nNeed \"twitch.json\" file in /save folder configure properly.");
-            TwitchBtn.UseVisualStyleBackColor = false;
-            TwitchBtn.Visible = false;
-            TwitchBtn.Click += TwitchBtn_Click;
             // 
             // skipDialogCheckBox
             // 
