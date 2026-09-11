@@ -19,7 +19,7 @@ permissions: write-all
 
 jobs:
   build:
-    runs-on: ubunbu-latest
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v7
