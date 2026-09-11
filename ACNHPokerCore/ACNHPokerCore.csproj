@@ -279,7 +279,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="cp -r $(ProjectDir)\csv $(TargetDir)\csv&#xD;&#xA;cp -r $(ProjectDir)\save $(TargetDir)\save&#xD;&#xA;cp -r $(ProjectDir)\VillagerDatabase $(TargetDir)\villager&#xD;&#xA;cp -r $(ProjectDir)\plugin $(TargetDir)&#xD;&#xA;exit 0" />
+    <Exec Command="robocopy $(ProjectDir)\csv $(TargetDir)\csv&#xD;&#xA;robocopy $(ProjectDir)\save $(TargetDir)\save&#xD;&#xA;robocopy $(ProjectDir)\VillagerDatabase $(TargetDir)\villager&#xD;&#xA;robocopy $(ProjectDir)\plugin $(TargetDir)&#xD;&#xA;exit 0" />
   </Target>
 
 </Project>
