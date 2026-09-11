@@ -59,8 +59,8 @@ jobs:
     - name: copy csv files
       continue-on-error: true    
       run: | 
-        robocopy ${{ github.workspace }}\ACNHPokerCore\VillagerDatabase ${{ github.workspace }}\publish\villager
-        robocopy ${{ github.workspace }}\ACNHPokerCore\csv ${{ github.workspace }}\publish\csv        
+        cp -r ${{ github.workspace }}\ACNHPokerCore\VillagerDatabase ${{ github.workspace }}\publish\villager
+        cp -r ${{ github.workspace }}\ACNHPokerCore\csv ${{ github.workspace }}\publish\csv        
 
 
     - name: Show Github infos
