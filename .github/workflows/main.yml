@@ -51,7 +51,7 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       ###run: dotnet publish -c Release -f ${{ env.NETVERSION }} -p:RuntimeIdentifierOverride=win10-x64 -p:SelfContained=true -p:PublishSingleFile=true -p:WindowsAppSDKSelfContained=true
       run: | 
-        dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./publish
+        dotnet publish -c Release -r win-x64  -p:EnableWindowsTargeting=true -p:self-contained=true -p:PublishSingleFile=true -o ./publish
 
     - name: list publish dir
       run: ls ${{ github.workspace }}\publish\
