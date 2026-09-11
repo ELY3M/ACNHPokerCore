@@ -50,40 +50,28 @@ jobs:
     - name: publish-windows
       working-directory: ${{env.GITHUB_WORKSPACE}}
       ###run: dotnet publish -c Release -f ${{ env.NETVERSION }} -p:RuntimeIdentifierOverride=win10-x64 -p:SelfContained=true -p:PublishSingleFile=true -p:WindowsAppSDKSelfContained=true
-      run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true
-
-
-    - name: Get .NET Version 
-      id: netversion
-      shell: cmd      
       run: | 
-        FOR /F "delims=" %%i IN ('dotnet msbuild ACNHPokerCore/ACNHPokerCore.csproj --getProperty:TargetFramework') DO (SET netversion=%%i)
-        echo %netversion%
-        echo netversion=%netversion%>>%GITHUB_OUTPUT%
-        
-    - name: .NET Version test     
-      run: | 
-        echo ${{ steps.netversion.outputs.netversion }}
+        dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./publish
+
+    - name: list publish dir
+      run: ls ${{ github.workspace }}\publish\
 
     - name: copy csv files
       continue-on-error: true    
       run: | 
-        robocopy ${{ github.workspace }}\ACNHPokerCore\VillagerDatabase ${{ github.workspace }}\ACNHPokerCore\bin\Release\${{ steps.netversion.outputs.netversion }}\win-x64\publish\villager
-        robocopy ${{ github.workspace }}\ACNHPokerCore\csv ${{ github.workspace }}\ACNHPokerCore\bin\Release\${{ steps.netversion.outputs.netversion }}\win-x64\publish\csv        
+        robocopy ${{ github.workspace }}\ACNHPokerCore\VillagerDatabase ${{ github.workspace }}\publish\villager
+        robocopy ${{ github.workspace }}\ACNHPokerCore\csv ${{ github.workspace }}\publish\csv        
 
 
     - name: Show Github infos
       run:  echo 'Workspace path ${{ github.workspace }} - runner.temp ${{ runner.temp }}'     
-
-
-     
-      
+           
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       id: upload
       with:
         name: Release
-        path: ${{ github.workspace }}\ACNHPokerCore\bin\Release\${{ steps.netversion.outputs.netversion }}\win-x64\publish\*
+        path: ${{ github.workspace }}\publish\*
         overwrite: true
         retention-days: 1
 
@@ -108,7 +96,7 @@ jobs:
         body: ${{ github.event.head_commit.message }}
 
     - name: Zipping up Release folder
-      run: 7z a release.zip "${{ github.workspace }}\ACNHPokerCore\bin\Release\${{ steps.netversion.outputs.netversion }}\win-x64\publish\"
+      run: 7z a release.zip "${{ github.workspace }}\publish\"
             
     - name: Upload Release
       uses: softprops/action-gh-release@v2
