@@ -74,11 +74,10 @@ jobs:
         with:
           draft: false
           prerelease: false    
-          tag_name: ${{ env.NOW }}
+          tag_name: ${{ steps.now.outputs.formattedTime }}
           body: ${{ github.event.head_commit.message }}
           files: ${{ github.workspace }}\release.zip
-          name: "Release ${{ env.NOW }}"
-        env:
-          GITHUB_TOKEN: ${{ github.token }} 
+          name: "Release ${{ steps.now.outputs.formattedTime }}"
+
           
           
