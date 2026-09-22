@@ -8,14 +8,6 @@ on:
   workflow_dispatch:
   workflow_call:
 
-env:
-  # Path to the solution file relative to the root of the project.
-  SOLUTION_FILE_PATH: .
-
-  # Configuration type to build.
-  # You can convert this to a build matrix if you need coverage of multiple configuration types.
-  # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-  BUILD_CONFIGURATION: Release
 
 permissions: write-all
 
@@ -24,73 +16,69 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v7
+      - uses: actions/checkout@v7
 
-    # Setup the .NET SDK (runs natively on Linux)
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '9.0.x' 
-
-    - name: Restore NuGet packages
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
-
-    # Restores and publishes the Windows .exe directly from Linux
-    - name: Publish Windows EXE
-      run: |
-        dotnet publish ${{ env.SOLUTION_FILE_PATH }} -c ${{ env.BUILD_CONFIGURATION }} -r win-x64 -o ./publish
-
-    - name: copy csv files
-      continue-on-error: true    
-      run: | 
-        robocopy ${{ github.workspace }}\ACNHPokerCore\VillagerDatabase ${{ github.workspace }}\publish\villager
-        robocopy ${{ github.workspace }}\ACNHPokerCore\csv ${{ github.workspace }}\publish\csv        
-
-    - name: List publish dir 
-      run: |
-        dir ${{ github.workspace }}\publish\
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x' 
+   
+      - name: Restore NuGet packages
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        run: nuget restore ${{env.SOLUTION_FILE_PATH}}
+   
+      - name: Publish Windows EXE
+        run: |
+          dotnet publish . -c Release -r win-x64 -o ./publish
+   
+      - name: copy csv files
+        continue-on-error: true    
+        run: | 
+          robocopy ${{ github.workspace }}\ACNHPokerCore\VillagerDatabase ${{ github.workspace }}\publish\villager
+          robocopy ${{ github.workspace }}\ACNHPokerCore\csv ${{ github.workspace }}\publish\csv        
+   
+      - name: List publish dir 
+        run: |
+          dir ${{ github.workspace }}\publish\
+          
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        id: upload
+        with:
+          name: Release
+          path: ${{ github.workspace }}\publish\*
+          overwrite: true
+          retention-days: 1
+   
+      - name: Output artifact ID
+        run:  echo 'Artifact ID is ${{ steps.upload.outputs.artifact-id }}'        
+          
+      - name: Output Artifact URL
+        run:  echo 'Artifact URL is ${{ steps.upload.outputs.artifact-url }}'
+           
+      - name: list all dirs 
+        run: ls -R
         
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
-      id: upload
-      with:
-        name: Release
-        path: ${{ github.workspace }}\publish\*
-        overwrite: true
-        retention-days: 1
+      - name: Get current time
+        id: now
+        uses: josStorer/get-current-time@v2
+        with:
+          timezone: "America/Chicago"
+          format: M-D-YY-hh.mm.ss.A
 
-    - name: Output artifact ID
-      run:  echo 'Artifact ID is ${{ steps.upload.outputs.artifact-id }}'        
-        
-    - name: Output Artifact URL
-      run:  echo 'Artifact URL is ${{ steps.upload.outputs.artifact-url }}'
-         
-    - name: list all dirs 
-      run: ls -R
-      
-    - name: Create Release
-      uses: actions/create-release@latest
-      env:
-        GITHUB_TOKEN: ${{ github.token }} 
-      with:
-        draft: false
-        prerelease: false
-        release_name: ${{ steps.version.outputs.version }}
-        tag_name: ${{ github.run_number }}
-        body: ${{ github.event.head_commit.message }}
-
-    - name: Zipping up Release folder
-      run: 7z a release.zip "${{ github.workspace }}\publish\"
-            
-    - name: Upload Release
-      uses: softprops/action-gh-release@v2
-      with:
-        draft: false
-        prerelease: false    
-        tag_name: ${{ github.run_number }}
-        body: ${{ github.event.head_commit.message }}
-        files: ${{ github.workspace }}\release.zip
-      env:
-        GITHUB_TOKEN: ${{ github.token }} 
-        
+      - name: Zipping up Release folder
+        run: 7z a release.zip "${{ github.workspace }}\publish\"
+              
+      - name: Upload Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: false
+          prerelease: false    
+          tag_name: ${{ env.NOW }}
+          body: ${{ github.event.head_commit.message }}
+          files: ${{ github.workspace }}\release.zip
+          name: "Release ${{ env.NOW }}"
+        env:
+          GITHUB_TOKEN: ${{ github.token }} 
+          
+          
